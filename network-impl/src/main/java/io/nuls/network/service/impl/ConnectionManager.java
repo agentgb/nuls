@@ -118,7 +118,7 @@ public class ConnectionManager {
             list = new ArrayList<>();
             byte[] bytes = buffer.array();
             int offset = 0;
-            while (offset < bytes.length) {
+            while (offset < bytes.length-1) {
                 NulsMessage message = new NulsMessage(bytes);
                 list.add(message);
                 offset = message.serialize().length;
