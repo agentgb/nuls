@@ -28,6 +28,7 @@ import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.protocol.base.download.DownloadCacheHandler;
 import io.nuls.protocol.event.BlockEvent;
 import io.nuls.protocol.model.Block;
+import io.nuls.protocol.model.Transaction;
 
 /**
  * @author facjas
@@ -42,7 +43,9 @@ public class BlockEventHandler extends AbstractEventHandler<BlockEvent> {
             Log.warn("recieved a null blockEvent form " + fromId);
             return;
         }
-
+        for(Transaction tx:block.getTxs()){
+            tx.afterParse();
+        }
         DownloadCacheHandler.receiveBlock(block);
     }
 }

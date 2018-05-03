@@ -77,7 +77,7 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
     }
 
     @Override
-    protected void afterParse() {
+    public void afterParse() {
         coinDataProvider.afterParse(coinData, this);
     }
 

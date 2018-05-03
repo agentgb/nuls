@@ -71,6 +71,7 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
         if (null == tx) {
             return;
         }
+        tx.afterParse();
         if (tx.getType() == TransactionConstant.TX_TYPE_COIN_BASE || tx.getType() == TransactionConstant.TX_TYPE_YELLOW_PUNISH || tx.getType() == TransactionConstant.TX_TYPE_RED_PUNISH) {
             return;
         }
@@ -86,7 +87,7 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
         }
         try {
             List<Transaction> waitingList = ledgerService.getWaitingTxList();
-            for (int i = waitingList.size()-1; i >= 0; i--) {
+            for (int i = waitingList.size() - 1; i >= 0; i--) {
                 if (waitingList.get(i).getHash().equals(tx.getHash())) {
                     waitingList.remove(i);
                     break;

@@ -72,11 +72,6 @@ public abstract class BaseNulsData implements NulsData, Serializable, Cloneable 
         }
         RuntimeSchema schema = SCHEMA_MAP.get(this.getClass());
         ProtostuffIOUtil.mergeFrom(bytes, this, schema);
-        this.afterParse();
-    }
-
-    protected void afterParse(){
-        //implementation for need
     }
 
     protected void registerValidator(NulsDataValidator<? extends BaseNulsData> validator) {

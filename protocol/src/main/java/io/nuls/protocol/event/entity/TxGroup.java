@@ -23,17 +23,10 @@
  */
 package io.nuls.protocol.event.entity;
 
-import io.nuls.core.crypto.VarInt;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.crypto.Utils;
 import io.nuls.protocol.model.BaseNulsData;
 import io.nuls.protocol.model.NulsDigestData;
 import io.nuls.protocol.model.Transaction;
-import io.nuls.protocol.utils.io.NulsByteBuffer;
-import io.nuls.protocol.utils.io.NulsOutputStreamBuffer;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,13 +41,10 @@ public class TxGroup extends BaseNulsData {
     private List<Transaction> txList;
     private Map<String, Transaction> txMap;
 
-    @Override
-    protected void afterParse() {
-        super.afterParse();
-        this.initTxMap();
-    }
-
-    private void initTxMap() {
+    private synchronized void initTxMap() {
+        if (null != txMap) {
+            return;
+        }
         this.txMap = new HashMap<>();
         for (Transaction tx : txList) {
             txMap.put(tx.getHash().getDigestHex(), tx);
@@ -82,7 +72,10 @@ public class TxGroup extends BaseNulsData {
         return txMap.get(digestHex);
     }
 
-    public Map<String,Transaction> getTxMap(){
+    public Map<String, Transaction> getTxMap() {
+        if (null == txMap) {
+            initTxMap();
+        }
         return txMap;
     }
 }

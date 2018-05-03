@@ -57,8 +57,14 @@ public class BlockHeader extends BaseNulsData {
         initValidators();
     }
 
-    @Override
-    protected void afterParse() {
+    protected synchronized void calcHash() {
+        if (null != this.hash) {
+            return;
+        }
+        forceCalcHash();
+    }
+
+    protected void forceCalcHash() {
         P2PKHScriptSig tempSign = this.scriptSign;
         this.scriptSign = null;
         this.hash = NulsDigestData.calcDigestData(this.serialize());
@@ -73,6 +79,9 @@ public class BlockHeader extends BaseNulsData {
     }
 
     public NulsDigestData getHash() {
+        if (null == hash) {
+            calcHash();
+        }
         return hash;
     }
 

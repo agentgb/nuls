@@ -66,7 +66,9 @@ public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
             return;
         }
         BlockHeader header = smallBlock.getHeader();
-
+        for (Transaction tx : txGroup.getTxList()) {
+            tx.afterParse();
+        }
         Map<String, Transaction> txMap = new HashMap<>();
         for (Transaction tx : smallBlock.getSubTxList()) {
             txMap.put(tx.getHash().getDigestHex(), tx);
@@ -79,14 +81,14 @@ public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
                 tx = temporaryCacheManager.getTx(hashHex);
             }
             if (null == tx) {
-               return;
+                return;
             }
             txMap.put(tx.getHash().getDigestHex(), tx);
         }
 
         Block block = ConsensusTool.assemblyBlock(header, txMap, smallBlock.getTxHashList());
 
-       consensusService.newBlock(block, networkService.getNode(fromId));
+        consensusService.newBlock(block, networkService.getNode(fromId));
 
         AssembledBlockNotice notice = new AssembledBlockNotice();
         notice.setEventBody(header);

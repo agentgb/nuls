@@ -96,6 +96,7 @@ public class SmallBlockHandler extends AbstractEventHandler<SmallBlockEvent> {
         }
         Map<String, Transaction> txMap = new HashMap<>();
         for (Transaction tx : smallBlock.getSubTxList()) {
+            tx.afterParse();
             txMap.put(tx.getHash().getDigestHex(), tx);
         }
         List<NulsDigestData> needHashList = new ArrayList<>();

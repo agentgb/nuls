@@ -23,12 +23,10 @@
  */
 package io.nuls.protocol.model;
 
-import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.protocol.constant.TxStatusEnum;
 import io.nuls.protocol.utils.TransactionValidatorManager;
-import io.nuls.protocol.utils.io.NulsByteBuffer;
 
 import java.util.List;
 
@@ -67,8 +65,14 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData {
 
     protected transient boolean isMine;
 
-    @Override
-    protected void afterParse() {
+    protected synchronized void calcHash() {
+        if (null != hash) {
+            return;
+        }
+        forceCalcHash();
+    }
+
+    protected void forceCalcHash() {
         byte[] tempSig = this.scriptSig;
         this.scriptSig = null;
         this.hash = NulsDigestData.calcDigestData(this.serialize());
@@ -87,6 +91,10 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData {
         for (NulsDataValidator<Transaction> validator : list) {
             this.registerValidator(validator);
         }
+    }
+
+    public void afterParse() {
+        calcHash();
     }
 
     public abstract T parseTxData(byte[] bytes);
@@ -116,6 +124,9 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData {
     }
 
     public NulsDigestData getHash() {
+        if (null == hash) {
+            this.calcHash();
+        }
         return hash;
     }
 
@@ -123,13 +134,6 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData {
         this.hash = hash;
     }
 
-    //    public NulsSignData getSign() {
-//        return sign;
-//    }
-//
-//    public void setSign(NulsSignData sign) {
-//        this.sign = sign;
-//    }
     public byte[] getScriptSig() {
         return scriptSig;
     }
