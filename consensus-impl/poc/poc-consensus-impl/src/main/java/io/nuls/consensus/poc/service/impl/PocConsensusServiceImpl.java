@@ -30,7 +30,6 @@ import io.nuls.consensus.poc.cache.TxMemoryPool;
 import io.nuls.consensus.poc.container.BlockContainer;
 import io.nuls.consensus.poc.container.ChainContainer;
 import io.nuls.consensus.poc.manager.ChainManager;
-import io.nuls.consensus.poc.manager.RoundManager;
 import io.nuls.consensus.poc.protocol.constant.ConsensusStatusEnum;
 import io.nuls.consensus.poc.protocol.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.protocol.constant.PunishType;
@@ -288,12 +287,12 @@ public class PocConsensusServiceImpl implements PocConsensusService {
             joinTx = tx;
         } else {
             try {
-               Consensus<Agent> agentConsensus = this.getAgentByAddress(address);
-               if(null==agentConsensus){
-                   throw new NulsRuntimeException(ErrorCode.FAILED,"the agent is not exist!");
-               }
+                Consensus<Agent> agentConsensus = this.getAgentByAddress(address);
+                if (null == agentConsensus) {
+                    throw new NulsRuntimeException(ErrorCode.FAILED, "the agent is not exist!");
+                }
 
-                    joinTx = (AbstractCoinTransaction)this.ledgerService.getTx(NulsDigestData.fromDigestHex(agentConsensus.getExtend().getTxHash()));
+                joinTx = (AbstractCoinTransaction) this.ledgerService.getTx(NulsDigestData.fromDigestHex(agentConsensus.getExtend().getTxHash()));
 
             } catch (Exception e) {
                 Log.error(e);
@@ -326,12 +325,7 @@ public class PocConsensusServiceImpl implements PocConsensusService {
             coinTransferData.addFrom(account.getAddress().toString());
             StopAgentTransaction tx = new StopAgentTransaction(coinTransferData, password);
             tx.setTxData(joinTx.getHash());
-            try {
-                tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
-            } catch (IOException e) {
-                Log.error(e);
-                throw new NulsRuntimeException(ErrorCode.HASH_ERROR, e);
-            }
+            tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
             tx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(tx.getHash(), account, password).serialize());
             this.ledgerService.verifyTxWithException(tx, this.ledgerService.getWaitingTxList());
             event.setEventBody(tx);
@@ -346,12 +340,7 @@ public class PocConsensusServiceImpl implements PocConsensusService {
         coinTransferData.addFrom(account.getAddress().toString());
         CancelDepositTransaction tx = new CancelDepositTransaction(coinTransferData, password);
         tx.setTxData(joinTx.getHash());
-        try {
-            tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
-        } catch (IOException e) {
-            Log.error(e);
-            throw new NulsRuntimeException(ErrorCode.HASH_ERROR, e);
-        }
+        tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
         tx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(tx.getHash(), account, password).serialize());
         tx.verifyWithException();
         event.setEventBody(tx);
@@ -362,10 +351,10 @@ public class PocConsensusServiceImpl implements PocConsensusService {
 
     @Override
     public Map<String, Object> getConsensusInfo() {
-       // List<Consensus<Agent>> agentList = this.getEffectiveAgentList(null, NulsContext.getInstance().getBestHeight(), null);
-       // List<Consensus<Deposit>> depositList = this.getEffectiveDepositList(null, null, NulsContext.getInstance().getBestHeight(), null);
+        // List<Consensus<Agent>> agentList = this.getEffectiveAgentList(null, NulsContext.getInstance().getBestHeight(), null);
+        // List<Consensus<Deposit>> depositList = this.getEffectiveDepositList(null, null, NulsContext.getInstance().getBestHeight(), null);
 
-        Map<String,Object> valueMap = agentDataService.getAgentCount(NulsContext.getInstance().getBestHeight());
+        Map<String, Object> valueMap = agentDataService.getAgentCount(NulsContext.getInstance().getBestHeight());
         long sumDeposit = depositDataService.getSumDeposit(NulsContext.getInstance().getBestHeight());
 //        long totalDeposit = 0L;
 //        for (Consensus<Agent> agent : agentList) {
@@ -379,7 +368,7 @@ public class PocConsensusServiceImpl implements PocConsensusService {
         long rewardOfDay = ledgerService.getLastDayTimeReward();
 //
         Map<String, Object> map = new HashMap<>();
-        map.put("agentCount", ((Long)valueMap.get("getCount")).intValue());
+        map.put("agentCount", ((Long) valueMap.get("getCount")).intValue());
         map.put("rewardOfDay", rewardOfDay);
         map.put("totalDeposit", sumDeposit + sumAgentDeposit.longValue());
         if (null == this.getCurrentRound()) {

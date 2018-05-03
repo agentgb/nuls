@@ -15,7 +15,7 @@ public interface NulsData {
     /**
      * serialize important field
      */
-    byte[] serialize() throws IOException;
+    byte[] serialize();
 
-    void parse(byte[] bytes) throws NulsException;
+    void parse(byte[] bytes);
 }

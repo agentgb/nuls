@@ -23,50 +23,41 @@
  */
 package io.nuls.ledger.entity;
 
-import io.nuls.account.entity.Address;
 import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.crypto.VarInt;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.str.StringUtils;
-import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.model.BaseNulsData;
 import io.nuls.protocol.model.NulsDigestData;
 import io.nuls.protocol.script.P2PKHScript;
-import io.nuls.protocol.utils.io.NulsByteBuffer;
-import io.nuls.protocol.utils.io.NulsOutputStreamBuffer;
-
-import java.io.IOException;
 
 /**
  * Created by win10 on 2017/10/30.
  */
 public class UtxoOutput extends BaseNulsData {
 
-    private NulsDigestData txHash;
+    private transient NulsDigestData txHash;
 
     private int index;
 
     private long value;
 
-    private String address;
+    private transient String address;
 
     private long lockTime;
 
     private P2PKHScript p2PKHScript;
 
-    private OutPutStatusEnum status;
+    private transient OutPutStatusEnum status;
 
     /**
      * ------ redundancy ------
      */
-    private long createTime;
+    private transient long createTime;
 
-    private int txType;
+    private transient int txType;
 
     // key = txHash + "-" + index, a key that will not be serialized, only used for caching
-    private String key;
+    private transient String key;
 
 
     public UtxoOutput() {
@@ -75,40 +66,6 @@ public class UtxoOutput extends BaseNulsData {
     public UtxoOutput(NulsDigestData txHash) {
         this.txHash = txHash;
     }
-
-    @Override
-    public int size() {
-        int s = 0;
-        s += VarInt.sizeOf(index);
-        s += 8;
-        s += Utils.sizeOfInt48();
-        s += Utils.sizeOfNulsData(p2PKHScript);
-        return s;
-    }
-
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeVarInt(index);
-        stream.writeInt64(value);
-        stream.writeInt48(lockTime);
-        stream.writeNulsData(p2PKHScript);
-    }
-
-    @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        if (byteBuffer == null) {
-            return;
-        }
-        index = (int) byteBuffer.readVarInt();
-        value = byteBuffer.readInt64();
-        lockTime = byteBuffer.readInt48();
-        p2PKHScript = byteBuffer.readNulsData(new P2PKHScript());
-
-        Address addressObj = new Address(NulsContext.DEFAULT_CHAIN_ID, this.getOwner());
-
-        this.address = addressObj.toString();
-    }
-
 
     public NulsDigestData getTxHash() {
         return txHash;

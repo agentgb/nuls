@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,14 +23,8 @@
  */
 package io.nuls.protocol.mesasge;
 
-import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Hex;
-import io.nuls.core.utils.crypto.Utils;
 import io.nuls.protocol.model.BaseNulsData;
-import io.nuls.protocol.utils.io.NulsByteBuffer;
-import io.nuls.protocol.utils.io.NulsOutputStreamBuffer;
-
-import java.io.IOException;
 
 /**
  * @author vivi
@@ -38,7 +32,7 @@ import java.io.IOException;
  */
 public class NulsMessageHeader extends BaseNulsData {
 
-    public static final int MESSAGE_HEADER_SIZE = 10;
+    public static final transient int MESSAGE_HEADER_SIZE = 10;
 
     private int magicNumber;
 
@@ -54,10 +48,6 @@ public class NulsMessageHeader extends BaseNulsData {
         this.length = 0;
         this.xor = Hex.decode("00")[0];
         this.arithmetic = 0;
-    }
-
-    public NulsMessageHeader(NulsByteBuffer byteBuffer) throws NulsException {
-        parse(byteBuffer);
     }
 
     public NulsMessageHeader(int magicNumber) {
@@ -78,30 +68,6 @@ public class NulsMessageHeader extends BaseNulsData {
     public NulsMessageHeader(int magicNumber, int length, byte xor, byte arithmetic) {
         this(magicNumber, length, xor);
         this.arithmetic = arithmetic;
-    }
-
-
-    @Override
-    public int size() {
-        return MESSAGE_HEADER_SIZE;
-    }
-
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        byte[] header = new byte[MESSAGE_HEADER_SIZE];
-        Utils.int32ToByteArrayLE(magicNumber, header, 0);
-        Utils.int32ToByteArrayLE(length, header, 4);
-        Utils.uint16ToByteArrayLE(xor, header, 8);
-        header[9] = arithmetic;
-        stream.write(header);
-    }
-
-    @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.magicNumber = byteBuffer.readInt32LE();
-        this.length = byteBuffer.readInt32LE();
-        this.xor = byteBuffer.readByte();
-        this.arithmetic = byteBuffer.readByte();
     }
 
     @Override

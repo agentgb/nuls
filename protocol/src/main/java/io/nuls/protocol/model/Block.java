@@ -23,18 +23,11 @@
  */
 package io.nuls.protocol.model;
 
-import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.model.intf.NulsCloneable;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.protocol.utils.BlockValidatorManager;
-import io.nuls.protocol.utils.TransactionManager;
-import io.nuls.protocol.utils.io.NulsByteBuffer;
-import io.nuls.protocol.utils.io.NulsOutputStreamBuffer;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,37 +49,6 @@ public class Block extends BaseNulsData implements NulsCloneable {
         List<NulsDataValidator> list = BlockValidatorManager.getValidators();
         for (NulsDataValidator<Block> validator : list) {
             this.registerValidator(validator);
-        }
-    }
-
-    @Override
-    public int size() {
-        int size = header.size();
-        for (Transaction tx : txs) {
-            size += tx.size();
-        }
-        return size;
-    }
-
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        header.serializeToStream(stream);
-        for (Transaction tx : txs) {
-            stream.write(tx.serialize());
-        }
-    }
-
-    @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        header = new BlockHeader();
-        header.parse(byteBuffer);
-        try {
-            txs = TransactionManager.getInstances(byteBuffer,header.getTxCount());
-        } catch (Exception e) {
-            throw new NulsRuntimeException(ErrorCode.PARSE_OBJECT_ERROR,e.getMessage());
-        }
-        for(Transaction tx:txs){
-            tx.setBlockHeight(header.getHeight());
         }
     }
 

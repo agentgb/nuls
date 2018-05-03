@@ -25,14 +25,9 @@ package io.nuls.protocol.event.entity;
 
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.intf.NulsCloneable;
-import io.nuls.core.utils.crypto.Utils;
-import io.nuls.core.utils.log.Log;
 import io.nuls.protocol.model.BaseNulsData;
 import io.nuls.protocol.model.NulsDigestData;
 import io.nuls.protocol.utils.io.NulsByteBuffer;
-import io.nuls.protocol.utils.io.NulsOutputStreamBuffer;
-
-import java.io.IOException;
 
 /**
  * @author Niels
@@ -44,34 +39,9 @@ public abstract class Consensus<T extends BaseNulsData> extends BaseNulsData imp
 
     private T extend;
 
-    private NulsDigestData hash;
+    private transient NulsDigestData hash;
 
-    private long delHeight;
-
-    @Override
-    public int size() {
-        int size = 0;
-        size += Utils.sizeOfString(address);
-        size += Utils.sizeOfNulsData(extend);
-        return size;
-    }
-
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeString(address);
-        stream.writeNulsData(extend);
-    }
-
-    @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.address = byteBuffer.readString();
-       this.extend = this.parseExtend(byteBuffer);
-        try {
-            this.hash = NulsDigestData.calcDigestData(this.serialize());
-        } catch (IOException e) {
-            Log.error(e);
-        }
-    }
+    private transient long delHeight;
 
     protected abstract T parseExtend(NulsByteBuffer byteBuffer) throws NulsException;
 
@@ -92,17 +62,13 @@ public abstract class Consensus<T extends BaseNulsData> extends BaseNulsData imp
     }
 
     public NulsDigestData getHash() {
-        if(null==hash){
-            try {
-                this. hash = NulsDigestData.calcDigestData(this.serialize());
-            } catch (IOException e) {
-                Log.error(e);
-            }
+        if (null == hash) {
+            this.hash = NulsDigestData.calcDigestData(this.serialize());
         }
         return hash;
     }
 
-    public String getHexHash(){
+    public String getHexHash() {
         return this.getHash().getDigestHex();
     }
 

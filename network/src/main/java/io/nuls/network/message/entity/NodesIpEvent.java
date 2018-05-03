@@ -57,36 +57,6 @@ public class NodesIpEvent extends BaseEvent {
     }
 
     @Override
-    public int size() {
-        int s = 0;
-        s += EventHeader.EVENT_HEADER_LENGTH;
-        s += VarInt.sizeOf(ipList.size());
-        for (String ip : ipList) {
-            s += Utils.sizeOfString(ip);
-        }
-        return s;
-    }
-
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(getHeader());
-        stream.write(new VarInt(ipList.size()).encode());
-        for (String ip : ipList) {
-            stream.writeString(ip);
-        }
-    }
-
-    @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.setHeader(byteBuffer.readNulsData(new EventHeader()));
-        int size = (int) byteBuffer.readVarInt();
-        for (int i = 0; i < size; i++) {
-            String ip = byteBuffer.readString();
-            ipList.add(ip);
-        }
-    }
-
-    @Override
     protected BaseEvent parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
         return null;
     }

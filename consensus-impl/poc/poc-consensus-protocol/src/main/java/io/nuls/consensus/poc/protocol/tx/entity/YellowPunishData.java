@@ -24,13 +24,8 @@
 package io.nuls.consensus.poc.protocol.tx.entity;
 
 import io.nuls.account.entity.Address;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.crypto.Utils;
 import io.nuls.protocol.model.BaseNulsData;
-import io.nuls.protocol.utils.io.NulsByteBuffer;
-import io.nuls.protocol.utils.io.NulsOutputStreamBuffer;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,33 +38,6 @@ public class YellowPunishData extends BaseNulsData {
     private List<Address> addressList = new ArrayList<>();
 
     public YellowPunishData() {
-    }
-
-    @Override
-    public int size() {
-        int size = 0;
-        size += Utils.sizeOfVarInt(height);
-        size += Utils.sizeOfVarInt(addressList.size());
-        size += Address.HASH_LENGTH * addressList.size();
-        return size;
-    }
-
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeVarInt(height);
-        stream.writeVarInt(addressList.size());
-        for (Address address : addressList) {
-            stream.write(address.getHash());
-        }
-    }
-
-    @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.height = byteBuffer.readVarInt();
-        long size = byteBuffer.readVarInt();
-        for (int i = 0; i < size; i++) {
-            addressList.add(Address.fromHashs(byteBuffer.readBytes(Address.HASH_LENGTH)));
-        }
     }
 
     public long getHeight() {

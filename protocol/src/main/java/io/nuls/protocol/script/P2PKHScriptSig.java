@@ -31,9 +31,6 @@ import io.nuls.core.validate.ValidateResult;
 import io.nuls.protocol.model.NulsDigestData;
 import io.nuls.protocol.model.NulsSignData;
 import io.nuls.protocol.utils.io.NulsByteBuffer;
-import io.nuls.protocol.utils.io.NulsOutputStreamBuffer;
-
-import java.io.IOException;
 
 /**
  * author Facjas
@@ -46,11 +43,6 @@ public class P2PKHScriptSig extends Script {
 
     public P2PKHScriptSig(){
 
-    }
-
-    @Override
-    public int size() {
-        return signData.size()+ Utils.sizeOfBytes(publicKey);
     }
 
     public P2PKHScriptSig(byte[] signBytes, byte[] publicKey){
@@ -79,25 +71,6 @@ public class P2PKHScriptSig extends Script {
         this.publicKey = publicKey;
     }
 
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        signData.serializeToStream(stream);
-        stream.writeBytesWithLength(publicKey);
-    }
-
-    @Override
-    protected void parse(NulsByteBuffer byteBuffer)throws NulsException {
-        signData = byteBuffer.readNulsData(new NulsSignData());
-        publicKey = byteBuffer.readByLengthByte();
-    }
-
-    @Override
-    public byte[] getBytes() {
-
-        //todo
-        return new byte[0];
-    }
-
     public ValidateResult verifySign(NulsDigestData digestData){
         boolean b = ECKey.verify(digestData.getDigestBytes(),signData.getSignBytes(),this.getPublicKey());
         if(b){
@@ -113,5 +86,10 @@ public class P2PKHScriptSig extends Script {
 
     public static P2PKHScriptSig createFromBytes(byte[] bytes) throws NulsException {
         return new NulsByteBuffer(bytes).readNulsData(new P2PKHScriptSig());
+    }
+
+    @Override
+    public byte[] getBytes() {
+        return this.serialize();
     }
 }

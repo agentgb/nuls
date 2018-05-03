@@ -24,15 +24,9 @@
 
 package io.nuls.protocol.event.entity;
 
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.crypto.Utils;
 import io.nuls.protocol.constant.NotFoundType;
 import io.nuls.protocol.model.BaseNulsData;
 import io.nuls.protocol.model.NulsDigestData;
-import io.nuls.protocol.utils.io.NulsByteBuffer;
-import io.nuls.protocol.utils.io.NulsOutputStreamBuffer;
-
-import java.io.IOException;
 
 /**
  * @author: Niels Wang
@@ -50,29 +44,7 @@ public class NotFound extends BaseNulsData {
         this.type = type;
         this.hash = hash;
     }
-
-    @Override
-    public int size() {
-        int size = 1;
-        size += Utils.sizeOfNulsData(hash);
-        return size;
-    }
-
-    /**
-     * serialize important field
-     */
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.write((byte) type.getCode());
-        stream.writeNulsData(hash);
-    }
-
-    @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.type = NotFoundType.getType(byteBuffer.readByte());
-        this.hash = byteBuffer.readHash();
-    }
-
+ 
     public NotFoundType getType() {
         return type;
     }

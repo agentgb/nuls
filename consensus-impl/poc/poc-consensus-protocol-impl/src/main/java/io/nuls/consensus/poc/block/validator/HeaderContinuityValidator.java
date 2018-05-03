@@ -71,11 +71,7 @@ public class HeaderContinuityValidator implements NulsDataValidator<BlockHeader>
                 return ValidateResult.getFailedResult(ErrorCode.ORPHAN_BLOCK);
             }
             BlockRoundData roundData = new BlockRoundData();
-            try {
-                roundData.parse(header.getExtend());
-            } catch (NulsException e) {
-                Log.error(e);
-            }
+            roundData.parse(header.getExtend());
             long shouldTime = roundData.getRoundStartTime() + roundData.getPackingIndexOfRound() * ProtocolConstant.BLOCK_TIME_INTERVAL_SECOND * 1000;
             long difference = header.getTime() - shouldTime;
             long timeout = ProtocolConstant.BLOCK_TIME_INTERVAL_SECOND * 1000;

@@ -23,7 +23,6 @@
  */
 package io.nuls.event.bus.service.impl;
 
-import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.constant.EventCategoryEnum;
 import io.nuls.event.bus.handler.AbstractEventHandler;
@@ -64,30 +63,11 @@ public class EventBusServiceImpl implements EventBusService {
     }
 
     @Override
-    public void publishEvent(EventCategoryEnum category, byte[] bytes, String fromId) throws IllegalAccessException, NulsException, InstantiationException {
-        if (category == EventCategoryEnum.LOCAL) {
-            BaseEvent event = EventManager.getInstance(bytes);
-            this.publishLocalEvent(event);
-        } else {
-            this.publishNetworkEvent(bytes, fromId);
-        }
-    }
-
-    @Override
     public void publishEvent(EventCategoryEnum category, BaseEvent event, String fromId) {
         if (category == EventCategoryEnum.LOCAL) {
             this.publishLocalEvent((BaseEvent) event);
         } else {
             this.publishNetworkEvent((BaseEvent) event, fromId);
-        }
-    }
-
-    @Override
-    public void publishNetworkEvent(byte[] bytes, String fromId) {
-        try {
-            networkService.publish(bytes, fromId);
-        } catch (Exception e) {
-            Log.error(e);
         }
     }
 

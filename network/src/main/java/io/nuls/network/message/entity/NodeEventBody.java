@@ -51,32 +51,6 @@ public class NodeEventBody extends BaseNulsData {
     }
 
     @Override
-    public int size() {
-        int s = 0;
-        s += VarInt.sizeOf(nodes.size());
-        for (Node node : nodes) {
-            s += node.size();
-        }
-        return s;
-    }
-
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.write(new VarInt(nodes.size()).encode());
-        for (Node node : nodes) {
-            stream.writeNulsData(node);
-        }
-    }
-
-    @Override
-    protected void parse(NulsByteBuffer buffer) throws NulsException {
-        int size = (int) buffer.readVarInt();
-        for (int i = 0; i < size; i++) {
-            nodes.add(buffer.readNulsData(new Node()));
-        }
-    }
-
-    @Override
     public String toString() {
         StringBuffer buffer = new StringBuffer();
         for (Node node : nodes) {

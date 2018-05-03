@@ -23,15 +23,9 @@
  */
 package io.nuls.protocol.event.entity;
 
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.crypto.Utils;
-import io.nuls.core.utils.log.Log;
 import io.nuls.protocol.model.BaseNulsData;
 import io.nuls.protocol.model.NulsDigestData;
-import io.nuls.protocol.utils.io.NulsByteBuffer;
-import io.nuls.protocol.utils.io.NulsOutputStreamBuffer;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,53 +41,6 @@ public class BlockHashResponse extends BaseNulsData {
 
     private List<NulsDigestData> hashList = new ArrayList<>();
 
-    @Override
-    public int size() {
-        int size = 0;
-        size += Utils.sizeOfNulsData(requestEventHash);
-        size += Utils.sizeOfVarInt(heightList.size());
-        for (Long height : heightList) {
-            size += Utils.sizeOfVarInt(height);
-        }
-        size += Utils.sizeOfVarInt(hashList.size());
-        for (NulsDigestData hash : hashList) {
-            size += Utils.sizeOfNulsData(hash);
-        }
-        return size;
-    }
-
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(requestEventHash);
-        stream.writeVarInt(heightList.size());
-        for (Long height : heightList) {
-            stream.writeVarInt(height);
-        }
-        stream.writeVarInt(hashList.size());
-        for (NulsDigestData hash : hashList) {
-            stream.writeNulsData(hash);
-        }
-    }
-
-    @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.requestEventHash = byteBuffer.readHash();
-        long heightListSize = byteBuffer.readVarInt();
-        if (heightListSize > 0) {
-            this.heightList = new ArrayList<>();
-            for (int i = 0; i < heightListSize; i++) {
-                heightList.add(byteBuffer.readVarInt());
-            }
-        }
-        long hashListSize = byteBuffer.readVarInt();
-        if (hashListSize <= 0) {
-            return;
-        }
-        this.hashList = new ArrayList<>();
-        for (int i = 0; i < hashListSize; i++) {
-            hashList.add(byteBuffer.readHash());
-        }
-    }
 
     public List<Long> getHeightList() {
         return heightList;
@@ -104,12 +51,7 @@ public class BlockHashResponse extends BaseNulsData {
     }
 
     public NulsDigestData getHash() {
-        try {
-            return NulsDigestData.calcDigestData(this.serialize());
-        } catch (IOException e) {
-            Log.error(e);
-        }
-        return null;
+        return NulsDigestData.calcDigestData(this.serialize());
     }
 
     public void put(long height, NulsDigestData hash) {
@@ -134,17 +76,17 @@ public class BlockHashResponse extends BaseNulsData {
         }
     }
 
-    public NulsDigestData getBestHash(){
-        if(null==hashList||hashList.isEmpty()){
+    public NulsDigestData getBestHash() {
+        if (null == hashList || hashList.isEmpty()) {
             return null;
         }
-        return hashList.get(hashList.size()-1);
+        return hashList.get(hashList.size() - 1);
     }
 
-    public long getBestHeight(){
-        if(null==heightList||heightList.isEmpty()){
+    public long getBestHeight() {
+        if (null == heightList || heightList.isEmpty()) {
             return 0L;
         }
-        return heightList.get(heightList.size()-1);
+        return heightList.get(heightList.size() - 1);
     }
 }

@@ -1,18 +1,18 @@
 /**
  * MIT License
- **
+ * *
  * Copyright (c) 2017-2018 nuls.io
- **
+ * *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- **
+ * *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- **
+ * *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,94 +23,65 @@
  */
 package io.nuls.protocol.model;
 
-import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.crypto.UnsafeByteArrayOutputStream;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.exception.NulsVerificationException;
 import io.nuls.core.model.intf.NulsData;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.core.validate.ValidatorManager;
-import io.nuls.protocol.utils.io.NulsByteBuffer;
-import io.nuls.protocol.utils.io.NulsOutputStreamBuffer;
+import io.protostuff.LinkedBuffer;
+import io.protostuff.ProtostuffIOUtil;
+import io.protostuff.runtime.RuntimeSchema;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.Serializable;
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Niels
  * @date 2017/10/30
  */
-public abstract class BaseNulsData implements NulsData,Serializable, Cloneable {
+public abstract class BaseNulsData implements NulsData, Serializable, Cloneable {
 
-    protected NulsDataType dataType;
+    protected transient static Map<Class<? extends BaseNulsData>, RuntimeSchema<? extends BaseNulsData>> SCHEMA_MAP = new HashMap<>();
+
+    protected transient NulsDataType dataType;
 
     public BaseNulsData() {
+        if (SCHEMA_MAP.get(this.getClass()) == null) {
+            RuntimeSchema<? extends BaseNulsData> schema = RuntimeSchema.createFrom(this.getClass());
+            SCHEMA_MAP.put(this.getClass(), schema);
+        }
     }
 
-    public BaseNulsData(NulsByteBuffer buffer) throws NulsException {
-        this.parse(buffer);
+    public final int size() {
+        return this.serialize().length;
     }
 
+    /**
+     * First, serialize the version field
+     */
+    public final byte[] serialize() {
+        RuntimeSchema schema = SCHEMA_MAP.get(this.getClass());
+        return ProtostuffIOUtil.toByteArray(this, schema, LinkedBuffer.allocate(LinkedBuffer.DEFAULT_BUFFER_SIZE));
+    }
+
+    public final void parse(byte[] bytes)  {
+        if (bytes == null || bytes.length == 0) {
+            return;
+        }
+        RuntimeSchema schema = SCHEMA_MAP.get(this.getClass());
+        ProtostuffIOUtil.mergeFrom(bytes, this, schema);
+        this.afterParse();
+    }
+
+    protected void afterParse(){
+        //implementation for need
+    }
 
     protected void registerValidator(NulsDataValidator<? extends BaseNulsData> validator) {
         ValidatorManager.addValidator(this.getClass(), validator);
     }
-
-    public abstract int size();
-
-    /**
-     * First, serialize the version field
-     *
-     * @return
-     */
-    public final byte[] serialize() throws IOException {
-        ByteArrayOutputStream bos = null;
-        try {
-            int size = size();
-            bos = new UnsafeByteArrayOutputStream(size);
-            NulsOutputStreamBuffer buffer = new NulsOutputStreamBuffer(bos);
-            if (size == 0) {
-                bos.write(NulsConstant.PLACE_HOLDER);
-            } else {
-                serializeToStream(buffer);
-            }
-            byte[] bytes = bos.toByteArray();
-            if (bytes.length != this.size()) {
-                throw new NulsRuntimeException(ErrorCode.FAILED, "date serialize error：" + this.getClass());
-            }
-            return bytes;
-        } finally {
-            if (bos != null) {
-                try {
-                    bos.close();
-                } catch (IOException e) {
-                    throw e;
-                }
-            }
-        }
-    }
-
-    public final void parse(byte[] bytes) throws NulsException {
-        if (bytes == null || bytes.length == 0 || ((bytes.length == 4) && Arrays.equals(NulsConstant.PLACE_HOLDER, bytes))) {
-            return;
-        }
-        this.parse(new NulsByteBuffer(bytes));
-    }
-
-    /**
-     * serialize important field
-     *
-     * @param stream
-     * @throws IOException
-     */
-    protected abstract void serializeToStream(NulsOutputStreamBuffer stream) throws IOException;
-
-    protected abstract void parse(NulsByteBuffer byteBuffer) throws NulsException;
 
     /**
      * @throws NulsException

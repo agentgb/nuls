@@ -25,16 +25,10 @@ package io.nuls.ledger.entity;
 
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.crypto.Utils;
 import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 import io.nuls.ledger.service.impl.UtxoCoinManager;
-import io.nuls.protocol.model.BaseNulsData;
 import io.nuls.protocol.model.Na;
-import io.nuls.protocol.model.Transaction;
-import io.nuls.protocol.utils.io.NulsByteBuffer;
-import io.nuls.protocol.utils.io.NulsOutputStreamBuffer;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -68,61 +62,6 @@ public class UtxoData extends CoinData {
 
     public void setOutputs(List<UtxoOutput> outputs) {
         this.outputs = outputs;
-    }
-
-    @Override
-    public int size() {
-        int size = 0;
-        size += getListByteSize(inputs);
-        size += getListByteSize(outputs);
-        return size;
-    }
-
-    private int getListByteSize(List list) {
-        int size = 0;
-        if (list == null) {
-            size += Utils.sizeOfVarInt(0);
-        } else {
-            size += Utils.sizeOfVarInt(list.size());
-            for (int i = 0; i < list.size(); i++) {
-                size += Utils.sizeOfNulsData((BaseNulsData) list.get(i));
-            }
-        }
-        return size;
-    }
-
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeVarInt(inputs == null ? 0 : inputs.size());
-        if (inputs != null) {
-            for (int i = 0; i < inputs.size(); i++) {
-                stream.writeNulsData(inputs.get(i));
-            }
-        }
-        stream.writeVarInt(outputs == null ? 0 : outputs.size());
-        if (outputs != null) {
-            for (int i = 0; i < outputs.size(); i++) {
-                stream.writeNulsData(outputs.get(i));
-            }
-        }
-    }
-
-    @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        int size = (int) byteBuffer.readVarInt();
-        inputs = new ArrayList<>();
-        for (int i = 0; i < size; i++) {
-            UtxoInput input = byteBuffer.readNulsData(new UtxoInput());
-            inputs.add(input);
-        }
-
-        size = (int) byteBuffer.readVarInt();
-        outputs = new ArrayList<>();
-        for (int i = 0; i < size; i++) {
-            UtxoOutput output = byteBuffer.readNulsData(new UtxoOutput());
-            outputs.add(output);
-        }
-
     }
 
     @Override

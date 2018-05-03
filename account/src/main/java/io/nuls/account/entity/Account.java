@@ -23,23 +23,19 @@
  */
 package io.nuls.account.entity;
 
-import io.nuls.core.cfg.NulsConfig;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.crypto.*;
+import io.nuls.core.crypto.AESEncrypt;
+import io.nuls.core.crypto.ECKey;
+import io.nuls.core.crypto.EncryptedData;
+import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.intf.NulsCloneable;
 import io.nuls.core.utils.crypto.Hex;
-import io.nuls.core.utils.crypto.Utils;
-import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.protocol.model.BaseNulsData;
 import io.nuls.protocol.model.Transaction;
-import io.nuls.protocol.utils.io.NulsByteBuffer;
-import io.nuls.protocol.utils.io.NulsOutputStreamBuffer;
 import org.spongycastle.crypto.params.KeyParameter;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
@@ -61,22 +57,18 @@ public class Account extends BaseNulsData implements NulsCloneable {
 
     private byte[] extend;
 
-    private Long createTime;
+    private transient Long createTime;
 
     private byte[] encryptedPriKey;
     // Decrypted  prikey
-    private byte[] priKey;
+    private transient byte[] priKey;
     //local field
-    private ECKey ecKey;
+    private transient ECKey ecKey;
 
-    private List<Transaction> myTxs;
+    private transient List<Transaction> myTxs;
 
     public Account() {
 
-    }
-
-    public Account(NulsByteBuffer buffer) throws NulsException {
-        super(buffer);
     }
 
     public ECKey getEcKey() {
@@ -179,37 +171,6 @@ public class Account extends BaseNulsData implements NulsCloneable {
             throw new NulsException(ErrorCode.PASSWORD_IS_WRONG);
         }
         return true;
-    }
-
-    @Override
-    public int size() {
-        int s = Utils.sizeOfBytes(address.getHash());
-        s += Utils.sizeOfString(alias);
-        s += Utils.sizeOfBytes(encryptedPriKey);
-        s += Utils.sizeOfBytes(pubKey);
-        s += 1;
-        s += Utils.sizeOfBytes(extend);
-        return s;
-    }
-
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeBytesWithLength(address.getHash());
-        stream.writeString(alias);
-        stream.writeBytesWithLength(encryptedPriKey);
-        stream.writeBytesWithLength(pubKey);
-        stream.write(status);
-        stream.writeBytesWithLength(extend);
-    }
-
-    @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        address = Address.fromHashs(byteBuffer.readByLengthByte());
-        alias = new String(byteBuffer.readByLengthByte());
-        encryptedPriKey = byteBuffer.readByLengthByte();
-        pubKey = byteBuffer.readByLengthByte();
-        status = (int) (byteBuffer.readByte());
-        extend = byteBuffer.readByLengthByte();
     }
 
     public Address getAddress() {

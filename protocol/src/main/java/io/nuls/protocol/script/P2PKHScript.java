@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,10 +25,6 @@ package io.nuls.protocol.script;
 
 import io.nuls.core.exception.NulsException;
 import io.nuls.protocol.model.NulsDigestData;
-import io.nuls.protocol.utils.io.NulsByteBuffer;
-import io.nuls.protocol.utils.io.NulsOutputStreamBuffer;
-
-import java.io.IOException;
 
 /**
  * author Facjas
@@ -37,14 +33,6 @@ import java.io.IOException;
 public class P2PKHScript extends Script {
 
     private NulsDigestData publicKeyDigest;
-
-    public NulsDigestData getPublicKeyDigest() {
-        return publicKeyDigest;
-    }
-
-    public void setPublicKeyDigest(NulsDigestData publicKeyDigest) {
-        this.publicKeyDigest = publicKeyDigest;
-    }
 
     public P2PKHScript() {
     }
@@ -61,27 +49,16 @@ public class P2PKHScript extends Script {
     }
 
     @Override
-    public int size() {
-        return publicKeyDigest.size();
-    }
-
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(publicKeyDigest);
-    }
-
-    @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        publicKeyDigest = byteBuffer.readNulsData(new NulsDigestData());
-    }
-
-    @Override
     public byte[] getBytes() {
-        try {
-            return publicKeyDigest.serialize();
-        } catch (IOException e) {
-            return null;
-        }
+        return publicKeyDigest.serialize();
+    }
+
+    public NulsDigestData getPublicKeyDigest() {
+        return publicKeyDigest;
+    }
+
+    public void setPublicKeyDigest(NulsDigestData publicKeyDigest) {
+        this.publicKeyDigest = publicKeyDigest;
     }
 
     //todo  not finished

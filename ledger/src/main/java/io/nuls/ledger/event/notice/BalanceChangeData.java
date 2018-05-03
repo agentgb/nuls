@@ -84,30 +84,4 @@ public class BalanceChangeData extends BaseNulsData {
         this.amount = amount;
     }
 
-    @Override
-    public int size() {
-        int size = 0;
-        size += Utils.sizeOfString(address);
-        size += 1;
-        size += 1;
-        size += Utils.sizeOfVarInt(amount.getValue());
-        return size;
-    }
-
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeString(address);
-        stream.write(type);
-        stream.write(status);
-        stream.writeVarInt(amount.getValue());
-
-    }
-
-    @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-       this.address = byteBuffer.readString();
-       this.type = byteBuffer.readByte();
-       this.status = byteBuffer.readByte();
-       this.amount = Na.valueOf(byteBuffer.readVarInt());
-    }
 }

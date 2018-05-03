@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -27,21 +27,24 @@ package io.nuls.protocol.mesasge;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsVerificationException;
-import io.nuls.protocol.utils.io.NulsByteBuffer;
+import io.nuls.protocol.event.base.BaseEvent;
+import io.protostuff.LinkedBuffer;
+import io.protostuff.ProtostuffIOUtil;
+import io.protostuff.runtime.RuntimeSchema;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-public class NulsMessage {
+public class NulsMessage<T extends BaseEvent> {
 
+    private static transient RuntimeSchema schema = RuntimeSchema.createFrom(NulsMessage.class);
 
     protected NulsMessageHeader header;
 
-    protected byte[] data;
+    protected T data;
 
     public NulsMessage() {
         this.header = new NulsMessageHeader();
-        this.data = new byte[0];
     }
 
     public NulsMessage(ByteBuffer buffer) throws NulsException {
@@ -50,21 +53,20 @@ public class NulsMessage {
 
     public NulsMessage(NulsMessageHeader header) {
         this.header = header;
-        this.data = new byte[0];
     }
 
-    public NulsMessage(NulsMessageHeader header, byte[] data) {
+    public NulsMessage(NulsMessageHeader header, T data) {
         this.header = header;
         this.data = data;
         caculateXor();
-        header.setLength(data.length);
+        header.setLength(data.size());
     }
 
-    public NulsMessage(byte[] data) {
+    public NulsMessage(T data) {
         this.header = new NulsMessageHeader();
         this.data = data;
         caculateXor();
-        header.setLength(data.length);
+        header.setLength(data.size());
     }
 
     public NulsMessage(int magicNumber) {
@@ -72,7 +74,7 @@ public class NulsMessage {
         this.header.setMagicNumber(magicNumber);
     }
 
-    public NulsMessage(int magicNumber, byte[] data) {
+    public NulsMessage(int magicNumber, T data) {
         this(data);
         this.header.setMagicNumber(magicNumber);
     }
@@ -82,44 +84,35 @@ public class NulsMessage {
     }
 
     public byte caculateXor() {
-        if (header == null || data == null || data.length == 0) {
+        byte[] stream = data.serialize();
+        if (header == null || stream == null || stream.length == 0) {
             return 0x00;
         }
         byte xor = 0x00;
-        for (int i = 0; i < data.length; i++) {
-            xor ^= data[i];
+        for (int i = 0; i < stream.length; i++) {
+            xor ^= stream[i];
         }
         header.setXor(xor);
         return xor;
     }
 
     public byte[] serialize() throws IOException {
-        byte[] value = new byte[NulsMessageHeader.MESSAGE_HEADER_SIZE + data.length];
-        byte[] headerBytes = header.serialize();
-        System.arraycopy(headerBytes, 0, value, 0, headerBytes.length);
-        System.arraycopy(data, 0, value, headerBytes.length, data.length);
-        return value;
+        return ProtostuffIOUtil.toByteArray(this, schema, LinkedBuffer.allocate(LinkedBuffer.DEFAULT_BUFFER_SIZE));
     }
 
     public void parse(ByteBuffer byteBuffer) throws NulsException {
-        byte[] headers = new byte[NulsMessageHeader.MESSAGE_HEADER_SIZE];
-        byteBuffer.get(headers, 0, headers.length);
-        NulsMessageHeader header = new NulsMessageHeader(new NulsByteBuffer(headers));
-        byte[] data = new byte[header.getLength()];
-        byteBuffer.get(data, 0, data.length);
-        this.header = header;
-        this.data = data;
+        ProtostuffIOUtil.mergeFrom(byteBuffer.array(), this, schema);
     }
 
     public void setHeader(NulsMessageHeader header) {
         this.header = header;
     }
 
-    public byte[] getData() {
+    public T getData() {
         return data;
     }
 
-    public void setData(byte[] data) {
+    public void setData(T data) {
         this.data = data;
     }
 
@@ -128,7 +121,7 @@ public class NulsMessage {
             throw new NulsVerificationException(ErrorCode.NET_MESSAGE_ERROR);
         }
 
-        if (header.getLength() != data.length) {
+        if (header.getLength() != data.size()) {
             throw new NulsVerificationException(ErrorCode.NET_MESSAGE_LENGTH_ERROR);
         }
 

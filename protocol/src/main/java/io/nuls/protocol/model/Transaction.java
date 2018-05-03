@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,19 +23,13 @@
  */
 package io.nuls.protocol.model;
 
-import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.date.TimeService;
-import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.protocol.constant.TxStatusEnum;
 import io.nuls.protocol.utils.TransactionValidatorManager;
 import io.nuls.protocol.utils.io.NulsByteBuffer;
-import io.nuls.protocol.utils.io.NulsOutputStreamBuffer;
 
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -44,15 +38,9 @@ import java.util.List;
  */
 public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData {
 
-    protected NulsDigestData hash;
-
     protected int type;
 
-    protected int index;
-
     protected long time;
-
-    protected long blockHeight = -1L;
 
     protected Na fee;
 
@@ -62,16 +50,30 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData {
 
     protected T txData;
 
-    protected TxStatusEnum status = TxStatusEnum.UNCONFIRM;
+    protected transient NulsDigestData hash;
 
-    public static final int TRANSFER_RECEIVE = 1;
-    public static final int TRANSFER_SEND = 0;
+    protected transient int index;
+
+    protected transient long blockHeight = -1L;
+
+    protected transient TxStatusEnum status = TxStatusEnum.UNCONFIRM;
+
+    public static final transient int TRANSFER_RECEIVE = 1;
+    public static final transient int TRANSFER_SEND = 0;
     // when localTx is true, should care transferType
-    protected int transferType;
+    protected transient int transferType;
 
-    protected int size;
+    protected transient int size;
 
-    protected boolean isMine;
+    protected transient boolean isMine;
+
+    @Override
+    protected void afterParse() {
+        byte[] tempSig = this.scriptSig;
+        this.scriptSig = null;
+        this.hash = NulsDigestData.calcDigestData(this.serialize());
+        this.scriptSig = tempSig;
+    }
 
     public Transaction(int type) {
         this.dataType = NulsDataType.TRANSACTION;
@@ -87,48 +89,7 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData {
         }
     }
 
-    public abstract T parseTxData(NulsByteBuffer byteBuffer) throws NulsException;
-
-    @Override
-    public int size() {
-        int size = 0;
-        size += VarInt.sizeOf(type);
-        size += VarInt.sizeOf(time);
-        size += NulsConstant.INT48_VALUE_LENGTH1;
-        size += Utils.sizeOfBytes(remark);
-        size += Utils.sizeOfNulsData(txData);
-        //size += Utils.sizeOfNulsData(sign);
-        size += Utils.sizeOfBytes(scriptSig);
-        return size;
-    }
-
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeVarInt(type);
-        stream.writeVarInt(time);
-        stream.writeInt48(fee.getValue());
-        stream.writeBytesWithLength(remark);
-        stream.writeNulsData(txData);
-        stream.writeBytesWithLength(scriptSig);
-        //stream.writeNulsData(sign);
-    }
-
-    @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        type = (int) byteBuffer.readVarInt();
-        time = byteBuffer.readVarInt();
-        long feeValue = byteBuffer.readInt48();
-        this.fee = Na.valueOf(feeValue);
-        this.remark = byteBuffer.readByLengthByte();
-        txData = this.parseTxData(byteBuffer);
-        try {
-            hash = NulsDigestData.calcDigestData(this.serialize());
-        } catch (IOException e) {
-            Log.error(e);
-        }
-        scriptSig = byteBuffer.readByLengthByte();
-        //sign = byteBuffer.readSign();
-    }
+    public abstract T parseTxData(byte[] bytes);
 
     public long getTime() {
         return time;

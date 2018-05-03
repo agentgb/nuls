@@ -23,9 +23,6 @@
  */
 package io.nuls.ledger.entity;
 
-import io.nuls.core.crypto.VarInt;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.dao.UtxoOutputDataService;
 import io.nuls.db.entity.UtxoOutputPo;
@@ -34,10 +31,7 @@ import io.nuls.ledger.util.UtxoTransferTool;
 import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.model.BaseNulsData;
 import io.nuls.protocol.model.NulsDigestData;
-import io.nuls.protocol.utils.io.NulsByteBuffer;
-import io.nuls.protocol.utils.io.NulsOutputStreamBuffer;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,7 +41,7 @@ import java.util.Map;
  */
 public class UtxoInput extends BaseNulsData {
 
-    private NulsDigestData txHash;
+    private transient NulsDigestData txHash;
 
     private int index;
 
@@ -57,10 +51,10 @@ public class UtxoInput extends BaseNulsData {
 
     //private byte[] scriptSig;
 
-    private UtxoOutput from;
+    private transient UtxoOutput from;
 
     // key = fromHash + "-" + fromIndex, a key that will not be serialized, only used for caching
-    private String key;
+    private transient String key;
 
     public UtxoInput() {
 
@@ -75,43 +69,6 @@ public class UtxoInput extends BaseNulsData {
         this();
         this.txHash = txHash;
         this.from = output;
-    }
-
-    @Override
-    public int size() {
-        int size = 0;
-        size += VarInt.sizeOf(index);
-        size += Utils.sizeOfNulsData(fromHash);
-        size += VarInt.sizeOf(fromIndex);
-        //size += Utils.sizeOfBytes(scriptSig);
-        return size;
-    }
-
-    @Override
-    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeVarInt(index);
-        stream.writeNulsData(fromHash);
-        stream.writeVarInt(fromIndex);
-    }
-
-    @Override
-    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        index = (int) byteBuffer.readVarInt();
-        fromHash = byteBuffer.readNulsData(new NulsDigestData());
-        fromIndex = (int) byteBuffer.readVarInt();
-        getFrom();
-//        LedgerCacheService ledgerCacheService = LedgerCacheService.getInstance();
-//        UtxoOutput output = ledgerCacheService.getUtxo(this.getKey());
-//        if (output == null) {
-//        UtxoOutputDataService utxoOutputDataService = NulsContext.getServiceBean(UtxoOutputDataService.class);
-//        Map<String, Object> map = new HashMap<>();
-//        map.put("txHash", this.fromHash.getDigestHex());
-//        map.put("outIndex", this.fromIndex);
-//        UtxoOutputPo outputPo = utxoOutputDataService.get(map);
-//        if (outputPo != null) {
-//            from = UtxoTransferTool.toOutput(outputPo);
-//        }
-
     }
 
     public NulsDigestData getTxHash() {

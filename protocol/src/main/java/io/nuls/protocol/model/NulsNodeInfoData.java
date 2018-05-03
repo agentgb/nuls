@@ -23,11 +23,6 @@
  */
 package io.nuls.protocol.model;
 
-import io.nuls.protocol.utils.io.NulsByteBuffer;
-import io.nuls.protocol.utils.io.NulsOutputStreamBuffer;
-
-import java.io.IOException;
-
 /**
  *
  * @author facjas
@@ -35,20 +30,4 @@ import java.io.IOException;
  */
 public class NulsNodeInfoData extends BaseNulsData {
 
-    @Override
-    public int size() {
-        //todo
-        return 1;
-    }
-
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        //todo
-    }
-
-    @Override
-    protected void parse(NulsByteBuffer byteBuffer) {
-        //todo
-        return;
-    }
 }

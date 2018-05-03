@@ -31,7 +31,6 @@ import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
 import io.nuls.protocol.constant.TransactionConstant;
 import io.nuls.protocol.event.entity.Consensus;
-import io.nuls.protocol.utils.io.NulsByteBuffer;
 
 /**
  * @author Niels
@@ -59,8 +58,9 @@ public class RegisterAgentTransaction extends LockNulsTransaction<Consensus<Agen
     }
 
     @Override
-    public Consensus<Agent> parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
-        Consensus<Agent> consensus = byteBuffer.readNulsData(new ConsensusAgentImpl());
+    public Consensus<Agent> parseTxData(byte[] bytes) {
+        Consensus<Agent> consensus = new ConsensusAgentImpl();
+        consensus.parse(bytes);
         return consensus;
     }
 

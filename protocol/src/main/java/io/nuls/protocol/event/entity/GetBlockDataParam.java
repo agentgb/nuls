@@ -23,14 +23,8 @@
  */
 package io.nuls.protocol.event.entity;
 
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.crypto.Utils;
 import io.nuls.protocol.model.BaseNulsData;
 import io.nuls.protocol.model.NulsDigestData;
-import io.nuls.protocol.utils.io.NulsByteBuffer;
-import io.nuls.protocol.utils.io.NulsOutputStreamBuffer;
-
-import java.io.IOException;
 
 /**
  * @author Niels
@@ -44,32 +38,6 @@ public class GetBlockDataParam extends BaseNulsData {
     private long size;
 
     public GetBlockDataParam() {
-    }
-
-    @Override
-    public int size() {
-        int size = 0;
-        size += Utils.sizeOfVarInt(this.size);
-        size += Utils.sizeOfVarInt(start);
-        size += Utils.sizeOfNulsData(startHash);
-        size += Utils.sizeOfNulsData(endHash);
-        return size;
-    }
-
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeVarInt(size);
-        stream.writeVarInt(start);
-        stream.writeNulsData(startHash);
-        stream.writeNulsData(endHash);
-    }
-
-    @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.size = byteBuffer.readVarInt();
-        this.start = byteBuffer.readVarInt();
-        this.startHash = byteBuffer.readHash();
-        this.endHash = byteBuffer.readHash();
     }
 
     public NulsDigestData getStartHash() {

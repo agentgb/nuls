@@ -35,14 +35,16 @@ import io.nuls.protocol.utils.io.NulsByteBuffer;
  * @date 2017/12/4
  */
 public class RedPunishTransaction extends AbstractNoneCoinTransaction<RedPunishData> {
-    public RedPunishTransaction( ) {
+    public RedPunishTransaction() {
         super(TransactionConstant.TX_TYPE_RED_PUNISH);
         this.registerValidator(RedPunishValidator.getInstance());
     }
 
     @Override
-    public RedPunishData parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
-        return byteBuffer.readNulsData(new RedPunishData());
+    public RedPunishData parseTxData(byte[] bytes) {
+        RedPunishData data = new RedPunishData();
+        data.parse(bytes);
+        return data;
     }
 
 }

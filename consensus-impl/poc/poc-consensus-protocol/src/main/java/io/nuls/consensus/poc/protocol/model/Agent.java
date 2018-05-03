@@ -23,14 +23,8 @@
  */
 package io.nuls.consensus.poc.protocol.model;
 
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.crypto.Utils;
 import io.nuls.protocol.model.BaseNulsData;
 import io.nuls.protocol.model.Na;
-import io.nuls.protocol.utils.io.NulsByteBuffer;
-import io.nuls.protocol.utils.io.NulsOutputStreamBuffer;
-
-import java.io.IOException;
 
 /**
  * @author Niels
@@ -50,45 +44,13 @@ public class Agent extends BaseNulsData {
 
     private long startTime;
 
-    private long blockHeight = -1L;
+    private transient long blockHeight = -1L;
 
-    private int status;
-    private double creditVal;
+    private transient int status;
+    private transient double creditVal;
 
-    private long totalDeposit;
-    private String txHash;
-
-    @Override
-    public int size() {
-        int size = 0;
-        size += Utils.sizeOfVarInt(deposit.getValue());
-        size += Utils.sizeOfString(this.packingAddress);
-        size += Utils.sizeOfDouble(this.commissionRate);
-        size += Utils.sizeOfString(this.introduction);
-        size += Utils.sizeOfString(agentName);
-        size += Utils.sizeOfInt48();
-        return size;
-    }
-
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeVarInt(deposit.getValue());
-        stream.writeString(packingAddress);
-        stream.writeDouble(this.commissionRate);
-        stream.writeString(this.introduction);
-        stream.writeString(agentName);
-        stream.writeInt48(startTime);
-    }
-
-    @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.deposit = Na.valueOf(byteBuffer.readVarInt());
-        this.packingAddress = byteBuffer.readString();
-        this.commissionRate = byteBuffer.readDouble();
-        this.introduction = byteBuffer.readString();
-        this.agentName = byteBuffer.readString();
-        this.startTime = byteBuffer.readInt48();
-    }
+    private transient long totalDeposit;
+    private transient String txHash;
 
     public Na getDeposit() {
         return deposit;

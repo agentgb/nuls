@@ -26,13 +26,7 @@
 
 package io.nuls.protocol.model.basic;
 
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.crypto.Utils;
 import io.nuls.protocol.model.BasicTypeData;
-import io.nuls.protocol.utils.io.NulsByteBuffer;
-import io.nuls.protocol.utils.io.NulsOutputStreamBuffer;
-
-import java.io.IOException;
 
 /**
  * @author Niels
@@ -46,18 +40,5 @@ public class NulsIntegerData extends BasicTypeData<Integer> {
     public NulsIntegerData(Integer val) {
         super(val);
     }
-    @Override
-    public int size() {
-        return Utils.sizeOfVarInt(getVal());
-    }
 
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeVarInt(getVal());
-    }
-
-    @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.setVal((int) byteBuffer.readVarInt());
-    }
 }

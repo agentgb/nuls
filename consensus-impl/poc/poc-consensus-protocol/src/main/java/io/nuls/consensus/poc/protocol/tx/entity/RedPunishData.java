@@ -23,14 +23,7 @@
  */
 package io.nuls.consensus.poc.protocol.tx.entity;
 
-import io.nuls.core.crypto.VarInt;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.crypto.Utils;
 import io.nuls.protocol.model.BaseNulsData;
-import io.nuls.protocol.utils.io.NulsByteBuffer;
-import io.nuls.protocol.utils.io.NulsOutputStreamBuffer;
-
-import java.io.IOException;
 
 /**
  * @author Niels
@@ -42,33 +35,7 @@ public class RedPunishData extends BaseNulsData {
     private short reasonCode;
     private byte[] evidence;
 
-    public RedPunishData(){
-    }
-    @Override
-    public int size() {
-        int size = 0;
-        size += VarInt.sizeOf(height);
-        size += Utils.sizeOfString(address);
-        size += 2;
-        size += Utils.sizeOfBytes(evidence);
-        return size;
-    }
-
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeVarInt(height);
-        stream.writeString(address);
-        stream.writeShort(reasonCode);
-        stream.writeBytesWithLength(evidence);
-
-    }
-
-    @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.height = byteBuffer.readVarInt();
-        this.address = byteBuffer.readString();
-        this.reasonCode = byteBuffer.readShort();
-        this.evidence = byteBuffer.readByLengthByte();
+    public RedPunishData() {
     }
 
     public long getHeight() {

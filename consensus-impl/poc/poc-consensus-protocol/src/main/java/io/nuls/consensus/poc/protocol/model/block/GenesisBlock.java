@@ -47,7 +47,6 @@ import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.model.*;
 import io.nuls.protocol.script.P2PKHScriptSig;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -126,8 +125,8 @@ public final class GenesisBlock extends Block {
             Integer nuls = (Integer) map.get(CONFIG_FILED_NULS);
             AssertUtil.canNotEmpty(nuls, ErrorCode.NULL_PARAMETER);
             Integer height = (Integer) map.get(CONFIG_FILED_UNLOCK_HEIGHT);
-            Coin coin = new Coin(address,Na.parseNuls(nuls),0,height == null?0:height.longValue());
-            data.addTo( coin);
+            Coin coin = new Coin(address, Na.parseNuls(nuls), 0, height == null ? 0 : height.longValue());
+            data.addTo(coin);
             total = total.add(coin.getNa());
         }
         data.setTotalNa(total);
@@ -140,12 +139,7 @@ public final class GenesisBlock extends Block {
         }
         tx.setTime(this.blockTime);
         tx.setFee(Na.ZERO);
-        try {
-            tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
-        } catch (IOException e) {
-            Log.error(e);
-            throw new NulsRuntimeException(e);
-        }
+        tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
 
         P2PKHScriptSig p2PKHScriptSig = new P2PKHScriptSig();
         Account account = null;
@@ -162,11 +156,7 @@ public final class GenesisBlock extends Block {
             Log.error(e);
         }
 
-        try {
-            tx.setScriptSig(scriptSig.serialize());
-        } catch (IOException e) {
-            Log.error(e);
-        }
+        tx.setScriptSig(scriptSig.serialize());
 
         List<Transaction> txlist = new ArrayList<>();
 //        tx.setStatus(TxStatusEnum.AGREED);
@@ -196,11 +186,7 @@ public final class GenesisBlock extends Block {
         data.setRoundStartTime(header.getTime() - ProtocolConstant.BLOCK_TIME_INTERVAL_SECOND * 1000);
         data.setConsensusMemberCount(1);
         data.setPackingIndexOfRound(1);
-        try {
-            header.setExtend(data.serialize());
-        } catch (IOException e) {
-            Log.error(e);
-        }
+        header.setExtend(data.serialize());
         try {
             header.setPackingAddress(Address.fromHashs(address).getHash());
         } catch (NulsException e) {

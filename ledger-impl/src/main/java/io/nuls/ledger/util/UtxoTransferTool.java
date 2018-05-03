@@ -210,7 +210,7 @@ public class UtxoTransferTool {
             tx.setRemark(po.getRemark().getBytes(NulsConfig.DEFAULT_ENCODING));
         }
         if (null != po.getTxData()) {
-            tx.setTxData(tx.parseTxData(new NulsByteBuffer(po.getTxData())));
+            tx.setTxData(tx.parseTxData(po.getTxData()));
         }
         transferCoinData(tx, po.getInputs(), po.getOutputs());
         tx.setStatus(TxStatusEnum.CONFIRMED);
@@ -235,7 +235,7 @@ public class UtxoTransferTool {
             }
         }
         if (null != po.getTxData() && po.getTxData().length > 0) {
-            tx.setTxData(tx.parseTxData(new NulsByteBuffer(po.getTxData())));
+            tx.setTxData(tx.parseTxData(po.getTxData()));
         }
         if (po.getTxStatus() == TransactionLocalPo.UNCONFIRM) {
             tx.setStatus(TxStatusEnum.UNCONFIRM);

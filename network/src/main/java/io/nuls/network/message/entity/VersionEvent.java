@@ -66,36 +66,6 @@ public class VersionEvent extends BaseEvent {
         this.nulsVersion = NulsConfig.VERSION;
     }
 
-
-    @Override
-    public int size() {
-        int s = 0;
-        s += EventHeader.EVENT_HEADER_LENGTH;
-        s += VarInt.sizeOf(severPort);
-        s += VarInt.sizeOf(bestBlockHeight);
-        s += Utils.sizeOfString(bestBlockHash);
-        s += Utils.sizeOfString(nulsVersion);
-        return s;
-    }
-
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(getHeader());
-        stream.writeVarInt(severPort);
-        stream.writeVarInt(bestBlockHeight);
-        stream.writeString(bestBlockHash);
-        stream.writeString(nulsVersion);
-    }
-
-    @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.setHeader(byteBuffer.readNulsData(new EventHeader()));
-        severPort = (int) byteBuffer.readVarInt();
-        bestBlockHeight = byteBuffer.readVarInt();
-        bestBlockHash = byteBuffer.readString();
-        nulsVersion = byteBuffer.readString();
-    }
-
     @Override
     protected BaseNulsData parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
         return null;

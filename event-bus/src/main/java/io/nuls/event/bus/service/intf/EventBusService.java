@@ -23,7 +23,6 @@
  */
 package io.nuls.event.bus.service.intf;
 
-import io.nuls.core.exception.NulsException;
 import io.nuls.event.bus.constant.EventCategoryEnum;
 import io.nuls.event.bus.handler.intf.NulsEventHandler;
 import io.nuls.event.bus.service.entity.EventItem;
@@ -41,11 +40,7 @@ public interface EventBusService {
 
     void unsubscribeEvent(String subcribeId);
 
-    void publishEvent(EventCategoryEnum category, byte[] bytes, String fromId) throws IllegalAccessException, NulsException, InstantiationException;
-
     void publishEvent(EventCategoryEnum category, BaseEvent event, String fromId);
-
-    void publishNetworkEvent(byte[] bytes, String fromId);
 
     void publishNetworkEvent(BaseEvent event, String fromId);
 

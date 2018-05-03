@@ -37,10 +37,8 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.calc.DoubleUtils;
-import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.entity.AgentPo;
-import io.nuls.db.entity.BlockHeaderPo;
 import io.nuls.db.entity.DepositPo;
 import io.nuls.ledger.entity.params.Coin;
 import io.nuls.ledger.entity.params.CoinTransferData;
@@ -51,7 +49,6 @@ import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.event.entity.Consensus;
 import io.nuls.protocol.model.*;
 import io.nuls.protocol.script.P2PKHScriptSig;
-import io.nuls.protocol.utils.io.NulsByteBuffer;
 
 import java.io.IOException;
 import java.util.*;
@@ -199,11 +196,7 @@ public class ConsensusTool {
         block.setTxs(blockData.getTxList());
         BlockHeader header = new BlockHeader();
         block.setHeader(header);
-        try {
-            block.getHeader().setExtend(blockData.getRoundData().serialize());
-        } catch (IOException e) {
-            Log.error(e);
-        }
+        block.getHeader().setExtend(blockData.getRoundData().serialize());
         header.setHeight(blockData.getHeight());
         header.setTime(blockData.getTime());
         header.setPreHash(blockData.getPreHash());
@@ -273,7 +266,7 @@ public class ConsensusTool {
         }
         double totalAll = DoubleUtils.mul(localRound.getMemberCount(), PocConsensusConstant.BLOCK_REWARD.getValue());
         double commissionRate = DoubleUtils.div(self.getCommissionRate(), 100, 2);
-        double agentWeight = DoubleUtils.mul( DoubleUtils.sum(self.getOwnDeposit().getValue() , self.getTotalDeposit().getValue()), self.getCalcCreditVal());
+        double agentWeight = DoubleUtils.mul(DoubleUtils.sum(self.getOwnDeposit().getValue(), self.getTotalDeposit().getValue()), self.getCalcCreditVal());
         double blockReword = totalFee;
         if (localRound.getTotalWeight() > 0d && agentWeight > 0d) {
             blockReword = DoubleUtils.sum(blockReword, DoubleUtils.mul(totalAll, DoubleUtils.div(agentWeight, localRound.getTotalWeight())));

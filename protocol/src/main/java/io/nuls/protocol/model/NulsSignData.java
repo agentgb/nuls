@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,14 +24,8 @@
 package io.nuls.protocol.model;
 
 import io.nuls.core.crypto.ECKey;
-import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Hex;
-import io.nuls.core.utils.crypto.Utils;
-import io.nuls.core.utils.log.Log;
-import io.nuls.protocol.utils.io.NulsByteBuffer;
-import io.nuls.protocol.utils.io.NulsOutputStreamBuffer;
 
-import java.io.IOException;
 import java.math.BigInteger;
 
 /**
@@ -40,10 +34,10 @@ import java.math.BigInteger;
  */
 public class NulsSignData extends BaseNulsData {
 
-    public static final NulsSignData EMPTY_SIGN = new NulsSignData(new byte[]{0, 0, 1, 0});
+    public static final transient NulsSignData EMPTY_SIGN = new NulsSignData(new byte[]{0, 0, 1, 0});
 
-    public static short SIGN_ALG_ECC = (short)0;
-    public static short SIGN_ALG_DEFAULT = NulsSignData.SIGN_ALG_ECC;
+    public static transient short SIGN_ALG_ECC = (short) 0;
+    public static transient short SIGN_ALG_DEFAULT = NulsSignData.SIGN_ALG_ECC;
 
     protected short signAlgType;
     protected byte[] signBytes;
@@ -61,28 +55,7 @@ public class NulsSignData extends BaseNulsData {
 
     public NulsSignData(byte[] bytes) {
         this();
-        try {
-            this.parse(bytes);
-        } catch (NulsException e) {
-            Log.error(e);
-        }
-    }
-
-    @Override
-    public int size() {
-        return Utils.sizeOfBytes(signBytes) + 2;
-    }
-
-    @Override
-    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeShort(signAlgType);
-        stream.writeBytesWithLength(signBytes);
-    }
-
-    @Override
-    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.signAlgType = byteBuffer.readShort();
-        this.signBytes = byteBuffer.readByLengthByte();
+        this.parse(bytes);
     }
 
     public int getSignLength() {
@@ -102,28 +75,23 @@ public class NulsSignData extends BaseNulsData {
     }
 
     public String getSignHex() {
-        try {
-            return Hex.encode(serialize());
-        } catch (IOException e) {
-            Log.error(e);
-            return null;
-        }
+        return Hex.encode(serialize());
     }
 
-    public NulsSignData sign(NulsDigestData nulsDigestData, short signAlgType, BigInteger privkey){
-        if(signAlgType == NulsSignData.SIGN_ALG_ECC){
+    public NulsSignData sign(NulsDigestData nulsDigestData, short signAlgType, BigInteger privkey) {
+        if (signAlgType == NulsSignData.SIGN_ALG_ECC) {
             ECKey ecKey = ECKey.fromPrivate(privkey);
-            byte[] signBytes =  ecKey.sign(nulsDigestData.getDigestBytes(),privkey);
+            byte[] signBytes = ecKey.sign(nulsDigestData.getDigestBytes(), privkey);
             return new NulsSignData(signBytes);
         }
         return null;
     }
 
-    public NulsSignData sign(NulsDigestData nulsDigestData, BigInteger privkey){
+    public NulsSignData sign(NulsDigestData nulsDigestData, BigInteger privkey) {
         short signAlgType = NulsSignData.SIGN_ALG_DEFAULT;
-        if(signAlgType == NulsSignData.SIGN_ALG_ECC){
+        if (signAlgType == NulsSignData.SIGN_ALG_ECC) {
             ECKey ecKey = ECKey.fromPrivate(privkey);
-            return  sign(nulsDigestData, signAlgType, privkey);
+            return sign(nulsDigestData, signAlgType, privkey);
         }
         return null;
     }

@@ -23,15 +23,9 @@
  */
 package io.nuls.protocol.model;
 
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.validate.NulsDataValidator;
-import io.nuls.protocol.utils.BlockHeaderValidatorManager;
 import io.nuls.protocol.utils.SmallBlockValidatorManager;
-import io.nuls.protocol.utils.io.NulsByteBuffer;
-import io.nuls.protocol.utils.io.NulsOutputStreamBuffer;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,55 +42,6 @@ public class SmallBlock extends BaseNulsData {
         List<NulsDataValidator> list = SmallBlockValidatorManager.getValidators();
         for (NulsDataValidator validator : list) {
             this.registerValidator(validator);
-        }
-    }
-
-    @Override
-    public int size() {
-        int size = header.size();
-        size += Utils.sizeOfVarInt(txHashList.size());
-        for (NulsDigestData hash : txHashList) {
-            size += Utils.sizeOfNulsData(hash);
-        }
-        size += Utils.sizeOfVarInt(subTxList.size());
-        for (Transaction tx : subTxList) {
-            size += Utils.sizeOfNulsData(tx);
-        }
-        return size;
-    }
-
-    /**
-     * serialize important field
-     */
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(header);
-        stream.writeVarInt(txHashList.size());
-        for (NulsDigestData hash : txHashList) {
-            stream.writeNulsData(hash);
-        }
-        stream.writeVarInt(subTxList.size());
-        for (Transaction tx : subTxList) {
-            stream.writeNulsData(tx);
-        }
-    }
-
-    @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.header = byteBuffer.readNulsData(new BlockHeader());
-
-        this.txHashList = new ArrayList<>();
-        long hashListSize = byteBuffer.readVarInt();
-        for (int i = 0; i < hashListSize; i++) {
-            this.txHashList.add(byteBuffer.readHash());
-        }
-
-        this.subTxList = new ArrayList<>();
-        long subTxListSize = byteBuffer.readVarInt();
-        for (int i = 0; i < subTxListSize; i++) {
-            Transaction tx = byteBuffer.readTransaction();
-            tx.setBlockHeight(header.getHeight());
-            this.subTxList.add(tx);
         }
     }
 

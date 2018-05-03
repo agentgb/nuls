@@ -41,7 +41,7 @@ public class Alias extends BaseNulsData {
 
     private String alias;
 
-    private int status;
+    private transient int status;
 
     public Alias() {
 
@@ -50,30 +50,6 @@ public class Alias extends BaseNulsData {
     public Alias(String address, String alias) {
         this.address = address;
         this.alias = alias;
-    }
-
-    public Alias(NulsByteBuffer buffer) throws NulsException {
-        super(buffer);
-    }
-
-    @Override
-    public int size() {
-        int s = 0;
-        s += Utils.sizeOfString(address);
-        s += Utils.sizeOfString(alias);
-        return s;
-    }
-
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeString(address);
-        stream.writeString(alias);
-    }
-
-    @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.address = byteBuffer.readString();
-        this.alias = byteBuffer.readString();
     }
 
     public String getAddress() {

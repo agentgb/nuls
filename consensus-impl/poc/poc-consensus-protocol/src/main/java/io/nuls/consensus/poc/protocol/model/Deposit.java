@@ -39,10 +39,10 @@ import java.io.IOException;
 public class Deposit extends BaseNulsData {
     private Na deposit;
     private String agentHash;
-    private int status;
+    private transient int status;
     private long startTime;
-    private String txHash;
-    private long blockHeight = -1L;
+    private transient String txHash;
+    private transient long blockHeight = -1L;
 
     public long getStartTime() {
         return startTime;
@@ -66,29 +66,6 @@ public class Deposit extends BaseNulsData {
 
     public void setAgentHash(String agentHash) {
         this.agentHash = agentHash;
-    }
-
-    @Override
-    public int size() {
-        int size = 0;
-        size += Utils.sizeOfVarInt(deposit.getValue());
-        size += Utils.sizeOfString(agentHash);
-        size += Utils.sizeOfInt48();
-        return size;
-    }
-
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer buffer) throws IOException {
-        buffer.writeVarInt(deposit.getValue());
-        buffer.writeString(agentHash);
-        buffer.writeInt48(startTime);
-    }
-
-    @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.deposit = Na.valueOf(byteBuffer.readVarInt());
-        this.agentHash = byteBuffer.readString();
-        this.startTime = byteBuffer.readInt48();
     }
 
     public int getStatus() {

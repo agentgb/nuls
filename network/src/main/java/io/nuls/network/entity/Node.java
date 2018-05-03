@@ -23,19 +23,11 @@
  */
 package io.nuls.network.entity;
 
-import io.nuls.core.cfg.NulsConfig;
-import io.nuls.core.crypto.VarInt;
-import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.date.TimeService;
-import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.network.message.entity.VersionEvent;
 import io.nuls.protocol.model.BaseNulsData;
-import io.nuls.protocol.utils.io.NulsByteBuffer;
-import io.nuls.protocol.utils.io.NulsOutputStreamBuffer;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -45,46 +37,46 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Node extends BaseNulsData {
 
-    private String id;
+    private transient String id;
 
     private String ip;
 
-    private Integer port;
+    private transient Integer port;
 
     private Integer severPort = 0;
 
     private int magicNumber;
 
-    private String channelId;
+    private transient String channelId;
 
-    private Long lastTime;
+    private transient Long lastTime;
 
-    private Long lastFailTime;
+    private transient Long lastFailTime;
 
-    private Integer failCount;
+    private transient Integer failCount;
 
-    private Set<String> groupSet;
+    private transient Set<String> groupSet;
 
     /**
      * 1: inNode ,  2: outNode
      */
-    public final static int IN = 1;
-    public final static int OUT = 2;
-    private int type;
+    public final static transient int IN = 1;
+    public final static transient int OUT = 2;
+    private transient int type;
 
     /**
      * 0: wait , 1: connecting, 2: handshake 3: close
      */
-    public final static int WAIT = 0;
-    public final static int CONNECT = 1;
-    public final static int HANDSHAKE = 2;
-    public final static int CLOSE = 3;
-    public final static int BAD = 4;
-    private volatile int status;
+    public final static transient int WAIT = 0;
+    public final static transient int CONNECT = 1;
+    public final static transient int HANDSHAKE = 2;
+    public final static transient int CLOSE = 3;
+    public final static transient int BAD = 4;
+    private volatile transient int status;
 
-    private boolean canConnect;
+    private transient boolean canConnect;
 
-    private volatile VersionEvent versionMessage;
+    private volatile transient VersionEvent versionMessage;
 
     public Node() {
         this.status = CLOSE;
@@ -115,36 +107,6 @@ public class Node extends BaseNulsData {
         this.lastFailTime = TimeService.currentTimeMillis();
         this.setFailCount(this.getFailCount() + 1);
         this.status = Node.CLOSE;
-    }
-
-    @Override
-    public int size() {
-        int s = 0;
-        s += VarInt.sizeOf(magicNumber);
-        s += VarInt.sizeOf(severPort);
-        s += 1;
-        try {
-            s += ip.getBytes(NulsConfig.DEFAULT_ENCODING).length;
-        } catch (UnsupportedEncodingException e) {
-            Log.error(e);
-        }
-        return s;
-    }
-
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.write(new VarInt(magicNumber).encode());
-        stream.write(new VarInt(getSeverPort()).encode());
-        stream.writeString(ip);
-    }
-
-    @Override
-    public void parse(NulsByteBuffer buffer) throws NulsException {
-        magicNumber = (int) buffer.readVarInt();
-        severPort = (int) buffer.readVarInt();
-        port = severPort;
-        ip = new String(buffer.readByLengthByte());
-        this.groupSet = ConcurrentHashMap.newKeySet();
     }
 
     public boolean isHandShake() {

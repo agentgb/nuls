@@ -45,23 +45,6 @@ public class GetNodesIpEvent extends BaseEvent {
     }
 
     @Override
-    public int size() {
-        int s = 0;
-        s += EventHeader.EVENT_HEADER_LENGTH;
-        return s;
-    }
-
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(getHeader());
-    }
-
-    @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.setHeader(byteBuffer.readNulsData(new EventHeader()));
-    }
-
-    @Override
     protected BaseEvent parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
         return null;
     }

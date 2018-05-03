@@ -50,7 +50,9 @@ public class AliasTransaction extends AbstractCoinTransaction<Alias> {
     }
 
     @Override
-    public Alias parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
-        return new Alias(byteBuffer);
+    public Alias parseTxData(byte[] bytes) {
+        Alias alias= new Alias();
+        alias.parse(bytes);
+        return alias;
     }
 }

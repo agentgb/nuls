@@ -48,7 +48,9 @@ public class StopAgentTransaction extends UnlockNulsTransaction<NulsDigestData> 
     }
 
     @Override
-    public NulsDigestData parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
-        return byteBuffer.readHash();
+    public NulsDigestData parseTxData(byte[] bytes) {
+        NulsDigestData hash = new NulsDigestData();
+        hash.parse(bytes);
+        return hash;
     }
 }

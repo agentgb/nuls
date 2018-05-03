@@ -49,44 +49,9 @@ public class TxGroup extends BaseNulsData {
     private Map<String, Transaction> txMap;
 
     @Override
-    public int size() {
-        int size = 0;
-        size += Utils.sizeOfNulsData(blockHash);
-        size += VarInt.sizeOf(txList.size());
-        size += this.getTxListLength();
-        return size;
-    }
-
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(blockHash);
-        stream.writeVarInt(txList.size());
-        for (Transaction data : txList) {
-            stream.writeNulsData(data);
-        }
-    }
-
-    @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.blockHash = byteBuffer.readHash();
-        long txCount = byteBuffer.readVarInt();
-        this.txList = new ArrayList<>();
-        for (int i = 0; i < txCount; i++) {
-            try {
-                this.txList.add(byteBuffer.readTransaction());
-            } catch (Exception e) {
-                throw new NulsException(e);
-            }
-        }
-        initTxMap();
-    }
-
-    private int getTxListLength() {
-        int size = 0;
-        for (Transaction tx : txList) {
-            size += Utils.sizeOfNulsData(tx);
-        }
-        return size;
+    protected void afterParse() {
+        super.afterParse();
+        this.initTxMap();
     }
 
     private void initTxMap() {

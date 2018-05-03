@@ -3,14 +3,11 @@ package io.nuls.protocol.base.utils;
 import io.nuls.account.entity.Address;
 import io.nuls.consensus.poc.protocol.model.block.BlockRoundData;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.log.Log;
 import io.nuls.db.entity.BlockHeaderPo;
 import io.nuls.protocol.model.BlockHeader;
 import io.nuls.protocol.model.NulsDigestData;
 import io.nuls.protocol.script.P2PKHScriptSig;
 import io.nuls.protocol.utils.io.NulsByteBuffer;
-
-import java.io.IOException;
 
 /**
  * @author: Niels Wang
@@ -28,21 +25,13 @@ public class BlockHeaderTool {
         po.setHash(header.getHash().getDigestHex());
         po.setSize(header.getSize());
         if (null != header.getScriptSig()) {
-            try {
-                po.setScriptSig(header.getScriptSig().serialize());
-            } catch (IOException e) {
-                Log.error(e);
-            }
+            po.setScriptSig(header.getScriptSig().serialize());
         }
         po.setTxCount(header.getTxCount());
         po.setConsensusAddress(Address.fromHashs(header.getPackingAddress()).getBase58());
         po.setExtend(header.getExtend());
         BlockRoundData data = new BlockRoundData();
-        try {
-            data.parse(header.getExtend());
-        } catch (NulsException e) {
-            Log.error(e);
-        }
+        data.parse(header.getExtend());
         po.setRoundIndex(data.getRoundIndex());
         return po;
     }

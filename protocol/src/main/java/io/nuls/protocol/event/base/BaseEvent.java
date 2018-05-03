@@ -1,18 +1,18 @@
 /**
  * MIT License
- **
+ * *
  * Copyright (c) 2017-2018 nuls.io
- **
+ * *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- **
+ * *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- **
+ * *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,54 +23,24 @@
  */
 package io.nuls.protocol.event.base;
 
-import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.intf.NulsCloneable;
-import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.log.Log;
 import io.nuls.protocol.model.BaseNulsData;
 import io.nuls.protocol.model.NulsDigestData;
 import io.nuls.protocol.utils.io.NulsByteBuffer;
-import io.nuls.protocol.utils.io.NulsOutputStreamBuffer;
-
-import java.io.IOException;
 
 /**
  * @author Niels
  * @date 2017/11/7
  */
 public abstract class BaseEvent<T extends BaseNulsData> extends BaseNulsData implements NulsCloneable {
-    private NulsDigestData hash;
+    private transient NulsDigestData hash;
     private EventHeader header;
     private T eventBody;
 
     public BaseEvent(short moduleId, short eventType) {
         this.header = new EventHeader(moduleId, eventType);
-    }
-
-    @Override
-    public int size() {
-        int size = Utils.sizeOfNulsData(header);
-        size += Utils.sizeOfNulsData(eventBody);
-        return size;
-    }
-
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(header);
-        stream.writeNulsData(this.eventBody);
-    }
-
-    @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.header = byteBuffer.readNulsData(new EventHeader());
-        this.eventBody = parseEventBody(byteBuffer);
-        try {
-            this.hash = NulsDigestData.calcDigestData(this.serialize());
-        } catch (IOException e) {
-            Log.error(e);
-            throw new NulsException(ErrorCode.DATA_PARSE_ERROR);
-        }
     }
 
     @Override
@@ -103,11 +73,7 @@ public abstract class BaseEvent<T extends BaseNulsData> extends BaseNulsData imp
 
     public NulsDigestData getHash() {
         if (hash == null) {
-            try {
-                this.hash = NulsDigestData.calcDigestData(this.serialize());
-            } catch (IOException e) {
-                Log.error(e);
-            }
+            this.hash = NulsDigestData.calcDigestData(this.serialize());
         }
         return hash;
     }

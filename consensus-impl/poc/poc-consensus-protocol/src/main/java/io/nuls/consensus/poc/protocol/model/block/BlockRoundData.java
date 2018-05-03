@@ -23,15 +23,8 @@
  */
 package io.nuls.consensus.poc.protocol.model.block;
 
-import io.nuls.core.crypto.VarInt;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.log.Log;
 import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.model.BaseNulsData;
-import io.nuls.protocol.utils.io.NulsByteBuffer;
-import io.nuls.protocol.utils.io.NulsOutputStreamBuffer;
-
-import java.io.IOException;
 
 /**
  * @author Niels
@@ -52,40 +45,10 @@ public class BlockRoundData extends BaseNulsData {
     }
 
     public BlockRoundData(byte[] extend) {
-        try {
-            this.parse(new NulsByteBuffer(extend));
-        } catch (NulsException e) {
-            Log.error(e);
-        }
+        this.parse(extend);
     }
 
     public BlockRoundData() {
-    }
-
-    @Override
-    public int size() {
-        int size = 0;
-        size += VarInt.sizeOf(roundIndex);
-        size += VarInt.sizeOf(consensusMemberCount);
-        size += VarInt.sizeOf(roundStartTime);
-        size += VarInt.sizeOf(packingIndexOfRound);
-        return size;
-    }
-
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeVarInt(roundIndex);
-        stream.writeVarInt(consensusMemberCount);
-        stream.writeVarInt(roundStartTime);
-        stream.writeVarInt(packingIndexOfRound);
-    }
-
-    @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.roundIndex = byteBuffer.readVarInt();
-        this.consensusMemberCount = (int) byteBuffer.readVarInt();
-        this.roundStartTime = byteBuffer.readVarInt();
-        this.packingIndexOfRound = (int) byteBuffer.readVarInt();
     }
 
     public int getConsensusMemberCount() {

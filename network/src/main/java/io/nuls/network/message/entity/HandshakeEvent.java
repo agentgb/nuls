@@ -37,35 +37,6 @@ public class HandshakeEvent extends BaseEvent {
     }
 
     @Override
-    public int size() {
-        int s = 0;
-        s += EventHeader.EVENT_HEADER_LENGTH;
-        s += VarInt.sizeOf(handshakeType);
-        s += VarInt.sizeOf(severPort);
-        s += VarInt.sizeOf(bestBlockHeight);
-        s += Utils.sizeOfString(bestBlockHash);
-        return s;
-    }
-
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(getHeader());
-        stream.writeVarInt(handshakeType);
-        stream.writeVarInt(severPort);
-        stream.writeVarInt(bestBlockHeight);
-        stream.writeString(bestBlockHash);
-    }
-
-    @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.setHeader(byteBuffer.readNulsData(new EventHeader()));
-        handshakeType = (int) byteBuffer.readVarInt();
-        severPort = (int) byteBuffer.readVarInt();
-        bestBlockHeight = byteBuffer.readVarInt();
-        bestBlockHash = byteBuffer.readString();
-    }
-
-    @Override
     protected BaseNulsData parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
         return null;
     }

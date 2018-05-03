@@ -37,7 +37,7 @@ public class NulsMessageValidator {
             return ValidateResult.getFailedResult(ErrorCode.NET_MESSAGE_ERROR);
         }
 
-        if (data.getHeader().getLength() != data.getData().length) {
+        if (data.getHeader().getLength() != data.getData().size()) {
             return ValidateResult.getFailedResult(ErrorCode.NET_MESSAGE_LENGTH_ERROR);
         }
 

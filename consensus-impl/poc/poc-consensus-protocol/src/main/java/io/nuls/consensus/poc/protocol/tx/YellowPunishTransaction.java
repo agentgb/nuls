@@ -25,10 +25,8 @@ package io.nuls.consensus.poc.protocol.tx;
 
 import io.nuls.consensus.poc.protocol.tx.entity.YellowPunishData;
 import io.nuls.consensus.poc.protocol.tx.validator.YellowPunishValidator;
-import io.nuls.core.exception.NulsException;
 import io.nuls.ledger.entity.tx.AbstractNoneCoinTransaction;
 import io.nuls.protocol.constant.TransactionConstant;
-import io.nuls.protocol.utils.io.NulsByteBuffer;
 
 /**
  * @author Niels
@@ -41,7 +39,9 @@ public class YellowPunishTransaction extends AbstractNoneCoinTransaction<YellowP
     }
 
     @Override
-    public YellowPunishData parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
-        return byteBuffer.readNulsData(new YellowPunishData());
+    public YellowPunishData parseTxData(byte[] bytes) {
+        YellowPunishData data = new YellowPunishData();
+        data.parse(bytes);
+        return data;
     }
 }

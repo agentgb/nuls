@@ -23,15 +23,9 @@
  */
 package io.nuls.protocol.event.entity;
 
-import io.nuls.core.crypto.VarInt;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.crypto.Utils;
 import io.nuls.protocol.model.BaseNulsData;
 import io.nuls.protocol.model.NulsDigestData;
-import io.nuls.protocol.utils.io.NulsByteBuffer;
-import io.nuls.protocol.utils.io.NulsOutputStreamBuffer;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,43 +40,6 @@ public class GetTxGroupParam extends BaseNulsData {
     private List<NulsDigestData> txHashList = new ArrayList<>();
 
     public GetTxGroupParam() {
-
-    }
-
-    @Override
-    public int size() {
-        int size = 0;
-        size += Utils.sizeOfNulsData(blockHash);
-        size += VarInt.sizeOf(txHashList.size());
-        size += this.getTxHashBytesLength();
-        return size;
-    }
-
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(blockHash);
-        stream.writeVarInt(txHashList.size());
-        for (NulsDigestData data : txHashList) {
-            stream.writeNulsData(data);
-        }
-    }
-
-    @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.blockHash = byteBuffer.readHash();
-        long txCount = byteBuffer.readVarInt();
-        this.txHashList = new ArrayList<>();
-        for (int i = 0; i < txCount; i++) {
-            this.txHashList.add(byteBuffer.readHash());
-        }
-    }
-
-    private int getTxHashBytesLength() {
-        int size = 0;
-        for (NulsDigestData hash : txHashList) {
-            size += Utils.sizeOfNulsData(hash);
-        }
-        return size;
     }
 
     public NulsDigestData getBlockHash() {

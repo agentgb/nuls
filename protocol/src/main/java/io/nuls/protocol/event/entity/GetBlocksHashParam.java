@@ -24,13 +24,7 @@
 
 package io.nuls.protocol.event.entity;
 
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.crypto.Utils;
 import io.nuls.protocol.model.BaseNulsData;
-import io.nuls.protocol.utils.io.NulsByteBuffer;
-import io.nuls.protocol.utils.io.NulsOutputStreamBuffer;
-
-import java.io.IOException;
 
 /**
  * @author Niels
@@ -40,26 +34,7 @@ public class GetBlocksHashParam extends BaseNulsData {
     private long start;
     private long size;
 
-    public GetBlocksHashParam(){
-    }
-    @Override
-    public int size() {
-        int size = 0;
-        size += Utils.sizeOfVarInt(start);
-        size +=Utils.sizeOfVarInt(size);
-        return size;
-    }
-
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-         stream.writeVarInt(start);
-         stream.writeVarInt(size);
-    }
-
-    @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-       this.start = byteBuffer.readVarInt();
-       this.size = byteBuffer.readVarInt();
+    public GetBlocksHashParam() {
     }
 
     public long getStart() {

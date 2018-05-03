@@ -77,29 +77,29 @@ public class EventManager {
         }
     }
 
-    public static BaseEvent getInstance(byte[] bytes) throws NulsException {
-        EventHeader header = new EventHeader();
-
-        header.parse(new NulsByteBuffer(bytes));
-        Class<? extends BaseEvent> clazz = EVENT_MAP.get(header.getModuleId() + "_" + header.getEventType());
-        if (null == clazz) {
-            return null;
-        }
-        BaseEvent event;
-        try {
-            event = clazz.newInstance();
-        } catch (Exception e) {
-            Log.error(e);
-            throw new NulsException(ErrorCode.DATA_PARSE_ERROR);
-        }
-        try {
-            event.parse(bytes);
-        } catch (Exception e) {
-            Log.error(Arrays.toString(bytes), e);
-            throw e;
-        }
-        return event;
-    }
+//    public static BaseEvent getInstance(byte[] bytes) throws NulsException {
+//        EventHeader header = new EventHeader();
+//
+//        header.parse(new NulsByteBuffer(bytes));
+//        Class<? extends BaseEvent> clazz = EVENT_MAP.get(header.getModuleId() + "_" + header.getEventType());
+//        if (null == clazz) {
+//            return null;
+//        }
+//        BaseEvent event;
+//        try {
+//            event = clazz.newInstance();
+//        } catch (Exception e) {
+//            Log.error(e);
+//            throw new NulsException(ErrorCode.DATA_PARSE_ERROR);
+//        }
+//        try {
+//            event.parse(bytes);
+//        } catch (Exception e) {
+//            Log.error(Arrays.toString(bytes), e);
+//            throw e;
+//        }
+//        return event;
+//    }
 
     public static Map<String, Class<? extends BaseEvent>> getEventMap() {
         return EVENT_MAP;

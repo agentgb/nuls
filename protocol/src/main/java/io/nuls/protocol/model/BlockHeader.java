@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,16 +23,10 @@
  */
 package io.nuls.protocol.model;
 
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.crypto.Utils;
-import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.protocol.script.P2PKHScriptSig;
 import io.nuls.protocol.utils.BlockHeaderValidatorManager;
-import io.nuls.protocol.utils.io.NulsByteBuffer;
-import io.nuls.protocol.utils.io.NulsOutputStreamBuffer;
 
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -41,7 +35,7 @@ import java.util.List;
  */
 public class BlockHeader extends BaseNulsData {
 
-    private NulsDigestData hash;
+    private transient NulsDigestData hash;
     private NulsDigestData preHash;
     private NulsDigestData merkleHash;
 
@@ -57,10 +51,18 @@ public class BlockHeader extends BaseNulsData {
 
     private byte[] extend;
 
-    private int size;
+    private transient int size;
 
     public BlockHeader() {
         initValidators();
+    }
+
+    @Override
+    protected void afterParse() {
+        P2PKHScriptSig tempSign = this.scriptSign;
+        this.scriptSign = null;
+        this.hash = NulsDigestData.calcDigestData(this.serialize());
+        this.scriptSign = tempSign;
     }
 
     private void initValidators() {
@@ -69,50 +71,6 @@ public class BlockHeader extends BaseNulsData {
             this.registerValidator(validator);
         }
     }
-
-    @Override
-    public int size() {
-        int size = 0;
-        size += Utils.sizeOfNulsData(preHash);
-        size += Utils.sizeOfNulsData(merkleHash);
-        size += Utils.sizeOfVarInt(time);
-        size += Utils.sizeOfVarInt(height);
-        size += Utils.sizeOfVarInt(txCount);
-        size += Utils.sizeOfBytes(packingAddress);
-        size += Utils.sizeOfBytes(extend);
-        size += Utils.sizeOfNulsData(scriptSign);
-        return size;
-    }
-
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(preHash);
-        stream.writeNulsData(merkleHash);
-        stream.writeVarInt(time);
-        stream.writeVarInt(height);
-        stream.writeVarInt(txCount);
-        stream.writeBytesWithLength(packingAddress);
-        stream.writeBytesWithLength(extend);
-        stream.writeNulsData(scriptSign);
-    }
-
-    @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.preHash = byteBuffer.readHash();
-        this.merkleHash = byteBuffer.readHash();
-        this.time = byteBuffer.readVarInt();
-        this.height = byteBuffer.readVarInt();
-        this.txCount = byteBuffer.readVarInt();
-        this.packingAddress = byteBuffer.readByLengthByte();
-        this.extend = byteBuffer.readByLengthByte();
-        try {
-            this.hash = NulsDigestData.calcDigestData(this.serialize());
-        } catch (IOException e) {
-            Log.error(e);
-        }
-        this.scriptSign = byteBuffer.readNulsData(new P2PKHScriptSig());
-    }
-
 
     public NulsDigestData getHash() {
         return hash;

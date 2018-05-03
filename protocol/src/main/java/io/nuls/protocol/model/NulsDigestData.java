@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -43,27 +43,22 @@ import java.util.List;
  */
 public class NulsDigestData extends BaseNulsData {
 
-    public static final NulsDigestData EMPTY_HASH = new NulsDigestData(new byte[]{0, 0,1, 0});
+    public static final transient NulsDigestData EMPTY_HASH = new NulsDigestData(new byte[]{0, 0, 1, 0});
     protected short digestAlgType = DIGEST_ALG_SHA256;
     protected byte[] digestBytes;
 
-    public static short DIGEST_ALG_SHA256=0;
-    public static short DIGEST_ALG_SHA160=1;
+    public transient static short DIGEST_ALG_SHA256 = 0;
+    public transient static short DIGEST_ALG_SHA160 = 1;
 
     public NulsDigestData() {
     }
 
     public NulsDigestData(byte[] bytes) {
         this();
-        try {
-            this.parse(bytes);
-        } catch (NulsException e) {
-            Log.error(e);
-            throw new NulsRuntimeException(ErrorCode.DATA_PARSE_ERROR,"hash format error");
-        }
+        this.parse(bytes);
     }
 
-    public NulsDigestData(short alg_type,byte[] bytes){
+    public NulsDigestData(short alg_type, byte[] bytes) {
         this.digestBytes = bytes;
         this.digestAlgType = alg_type;
     }
@@ -76,34 +71,9 @@ public class NulsDigestData extends BaseNulsData {
         this.digestAlgType = digestAlgType;
     }
 
-    @Override
-    public int size() {
-        return Utils.sizeOfBytes(digestBytes) + 2;
-    }
-
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer buffer) throws IOException {
-        buffer.writeShort(digestAlgType);
-        buffer.writeBytesWithLength(digestBytes);
-    }
-
-    @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.setDigestAlgType(byteBuffer.readShort());
-        try{
-            this.digestBytes = byteBuffer.readByLengthByte();
-        }catch (Exception e){
-           Log.error(e);
-        }
-    }
 
     public String getDigestHex() {
-        try {
-            return Hex.encode(serialize());
-        } catch (IOException e) {
-            Log.error(e);
-            return null;
-        }
+        return Hex.encode(serialize());
     }
 
     public static NulsDigestData fromDigestHex(String hex) {
@@ -129,7 +99,7 @@ public class NulsDigestData extends BaseNulsData {
     }
 
     public byte[] getWholeBytes() {
-        if(null==digestBytes){
+        if (null == digestBytes) {
             return null;
         }
         byte[] bytes = new byte[2 + digestBytes.length];
@@ -146,13 +116,13 @@ public class NulsDigestData extends BaseNulsData {
     public static NulsDigestData calcDigestData(byte[] data, short digestAlgType) {
         NulsDigestData digestData = new NulsDigestData();
         digestData.setDigestAlgType(digestAlgType);
-        if((short)0 == digestAlgType) {
+        if ((short) 0 == digestAlgType) {
             byte[] content = Sha256Hash.hashTwice(data);
             digestData.digestBytes = content;
             return digestData;
         }
         //todo extend other algType
-        if((short)1 == digestAlgType){
+        if ((short) 1 == digestAlgType) {
             byte[] content = Utils.sha256hash160(data);
             digestData.digestBytes = content;
             return digestData;
@@ -168,11 +138,11 @@ public class NulsDigestData extends BaseNulsData {
                 int right = Math.min(left + 1, levelSize - 1);
                 byte[] leftBytes = Utils.reverseBytes(ddList.get(levelOffset + left).getDigestBytes());
                 byte[] rightBytes = Utils.reverseBytes(ddList.get(levelOffset + right).getDigestBytes());
-                byte[] whole = new byte[leftBytes.length+rightBytes.length];
-                System.arraycopy(leftBytes,0,whole,0,leftBytes.length);
-                System.arraycopy(rightBytes,0,whole,leftBytes.length,rightBytes.length);
+                byte[] whole = new byte[leftBytes.length + rightBytes.length];
+                System.arraycopy(leftBytes, 0, whole, 0, leftBytes.length);
+                System.arraycopy(rightBytes, 0, whole, leftBytes.length, rightBytes.length);
                 NulsDigestData digest = NulsDigestData.calcDigestData(whole);
-                ddList.add( digest);
+                ddList.add(digest);
             }
             levelOffset += levelSize;
         }
