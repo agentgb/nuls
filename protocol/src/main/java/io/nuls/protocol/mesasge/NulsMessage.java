@@ -47,8 +47,8 @@ public class NulsMessage<T extends BaseEvent> {
         this.header = new NulsMessageHeader();
     }
 
-    public NulsMessage(ByteBuffer buffer) throws NulsException {
-        parse(buffer);
+    public NulsMessage(byte[] bytes) throws NulsException {
+        parse(bytes);
     }
 
     public NulsMessage(NulsMessageHeader header) {
@@ -96,12 +96,12 @@ public class NulsMessage<T extends BaseEvent> {
         return xor;
     }
 
-    public byte[] serialize() throws IOException {
+    public byte[] serialize() {
         return ProtostuffIOUtil.toByteArray(this, schema, LinkedBuffer.allocate(LinkedBuffer.DEFAULT_BUFFER_SIZE));
     }
 
-    public void parse(ByteBuffer byteBuffer) throws NulsException {
-        ProtostuffIOUtil.mergeFrom(byteBuffer.array(), this, schema);
+    public void parse(byte[] bytes) {
+        ProtostuffIOUtil.mergeFrom(bytes, this, schema);
     }
 
     public void setHeader(NulsMessageHeader header) {

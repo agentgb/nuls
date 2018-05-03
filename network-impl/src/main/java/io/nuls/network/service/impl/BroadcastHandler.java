@@ -378,8 +378,6 @@ public class BroadcastHandler {
                     return new BroadcastResult(false, "send message failed");
                 }
             }
-        } catch (IOException e) {
-            throw e;
         } catch (Exception e) {
             Log.error(e);
             return new BroadcastResult(false, "send message failed");

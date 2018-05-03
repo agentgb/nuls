@@ -1,18 +1,18 @@
 /**
  * MIT License
- **
+ * *
  * Copyright (c) 2017-2018 nuls.io
- **
+ * *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- **
+ * *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- **
+ * *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -116,9 +116,18 @@ public class ConnectionManager {
                 return;
             }
             list = new ArrayList<>();
-            while (buffer.hasRemaining()) {
-                NulsMessage message = new NulsMessage(buffer);
+            byte[] bytes = buffer.array();
+            int offset = 0;
+            while (offset < bytes.length) {
+                NulsMessage message = new NulsMessage(bytes);
                 list.add(message);
+                offset = message.serialize().length;
+                if (bytes.length > offset) {
+                    byte[] subBytes = new byte[bytes.length - offset];
+                    System.arraycopy(bytes, offset, subBytes, 0, subBytes.length);
+                    bytes = subBytes;
+                    offset = 0;
+                }
             }
             for (NulsMessage message : list) {
                 if (MessageFilterChain.getInstance().doFilter(message)) {
@@ -147,6 +156,7 @@ public class ConnectionManager {
     }
 
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
     private void processMessage(BaseEvent event, Node node) {
         if (event == null) {
 //            Log.error("---------------------NulEvent is null--------------------------------");
@@ -156,7 +166,7 @@ public class ConnectionManager {
             if (node.getStatus() != Node.HANDSHAKE && !isHandShakeMessage(event)) {
                 return;
             }
-           // System.out.println( sdf.format(System.currentTimeMillis()) + "-----------processMessage------------node:" + node.getId() + "------------moduleId: " + event.getHeader().getModuleId() + "," + "eventType:" + event.getHeader().getEventType());
+            // System.out.println( sdf.format(System.currentTimeMillis()) + "-----------processMessage------------node:" + node.getId() + "------------moduleId: " + event.getHeader().getModuleId() + "," + "eventType:" + event.getHeader().getEventType());
             asynExecute(event, node);
         } else {
             if (!node.isHandShake()) {
