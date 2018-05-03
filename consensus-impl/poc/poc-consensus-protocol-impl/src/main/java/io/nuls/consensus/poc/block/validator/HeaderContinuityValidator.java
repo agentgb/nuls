@@ -57,7 +57,7 @@ public class HeaderContinuityValidator implements NulsDataValidator<BlockHeader>
         boolean failed = false;
         do {
             if (header.getHeight() == 0) {
-                failed = !header.getPreHash().equals(NulsDigestData.EMPTY_HASH);
+                failed = !header.getPreHash().equals(NulsDigestData.calcDigestData(new byte[]{0}));
                 break;
             }
             BlockHeader preHeader = null;

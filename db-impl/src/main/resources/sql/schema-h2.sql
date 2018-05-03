@@ -22,10 +22,10 @@ CREATE TABLE IF NOT EXISTS `punish_log` (
 ) ;
 
 CREATE TABLE IF NOT EXISTS `block_header` (
-  `hash` varchar(70) NOT NULL,
+  `hash` varchar(72) NOT NULL,
   `height` bigint(14) NOT NULL,
-  `pre_hash` varchar(70) DEFAULT NULL,
-  `merkle_hash` varchar(70) NOT NULL,
+  `pre_hash` varchar(72) DEFAULT NULL,
+  `merkle_hash` varchar(72) NOT NULL,
   `create_time` bigint(14) NOT NULL,
   `consensus_address` varchar(40) DEFAULT NULL,
   `tx_count` int(5) NOT NULL,
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS `block_header` (
 ) ;
 
 CREATE TABLE IF NOT EXISTS `agent` (
-  `id` varchar(70) NOT NULL,
+  `id` varchar(72) NOT NULL,
   `agent_address` varchar(40) NOT NULL,
   `agent_name` varchar(50) NOT NULL,
   `block_height` bigint(18) NOT NULL,
@@ -47,22 +47,22 @@ CREATE TABLE IF NOT EXISTS `agent` (
   `remark` varchar(255) NOT NULL,
   `del_height` bigint(18) DEFAULT 0,
   `status` INT DEFAULT 0,
-   `tx_hash` varchar(70) NOT NULL,
+   `tx_hash` varchar(72) NOT NULL,
   `start_time` bigint(14) NOT NULL,
   `commission_rate` decimal(14,2) NOT NULL,
   PRIMARY KEY (`id`)
 ) ;
 
 CREATE TABLE IF NOT EXISTS `deposit` (
-  `id` varchar(70) NOT NULL,
+  `id` varchar(72) NOT NULL,
   `address` varchar(40) NOT NULL,
-  `agent_id` varchar(70) NOT NULL,
+  `agent_id` varchar(72) NOT NULL,
   `deposit` bigint(18) NOT NULL,
   `status` int(1) DEFAULT NULL,
   `del_height` bigint(18) DEFAULT 0,
   `time` bigint(14) DEFAULT NULL,
   `block_height` bigint(14) DEFAULT NULL,
-  `tx_hash` varchar(70) NOT NULL,
+  `tx_hash` varchar(72) NOT NULL,
   PRIMARY KEY (`id`)
 ) ;
 
@@ -93,10 +93,10 @@ CREATE TABLE IF NOT EXISTS `node_group_relation` (
 CREATE TABLE IF NOT EXISTS `sub_chain` (
   `id` varchar(30) NOT NULL,
   `creator_address` varchar(40) NOT NULL,
-  `tx_hash` varchar(70) NOT NULL,
+  `tx_hash` varchar(72) NOT NULL,
   `g_block` varbinary(1024) NOT NULL,
-  `g_block_hash` varchar(70) NOT NULL,
-  `g_merkle_hash` varchar(70) NOT NULL,
+  `g_block_hash` varchar(72) NOT NULL,
+  `g_merkle_hash` varchar(72) NOT NULL,
   `g_block_header` varbinary(1024) NOT NULL,
   `title` varchar(255) NOT NULL,
   `sign` varbinary(1024) NOT NULL,
@@ -105,7 +105,7 @@ CREATE TABLE IF NOT EXISTS `sub_chain` (
 ) ;
 
 CREATE TABLE IF NOT EXISTS `transaction` (
-  `hash` varchar(70) NOT NULL,
+  `hash` varchar(72) NOT NULL,
   `tx_index` int(5) NOT NULL,
   `type` int(5) NOT NULL,
   `create_time` bigint(15) NOT NULL,
@@ -119,7 +119,7 @@ CREATE TABLE IF NOT EXISTS `transaction` (
 ) ;
 
 CREATE TABLE IF NOT EXISTS `transaction_local` (
-  `hash` varchar(70) NOT NULL,
+  `hash` varchar(72) NOT NULL,
   `tx_index` int(5) NOT NULL,
   `type` int(5) NOT NULL,
   `create_time` bigint(15) NOT NULL,
@@ -136,22 +136,22 @@ CREATE TABLE IF NOT EXISTS `transaction_local` (
 ) ;
 
 CREATE TABLE IF NOT EXISTS `tx_account_relation` (
-  `tx_hash` varchar(70) NOT NULL,
+  `tx_hash` varchar(72) NOT NULL,
   `address` varchar(40) NOT NULL,
   PRIMARY KEY (`tx_hash`, `address`)
 ) ;
 
 CREATE TABLE IF NOT EXISTS `utxo_input` (
-  `tx_hash` varchar(70) NOT NULL,
+  `tx_hash` varchar(72) NOT NULL,
   `in_index` int(5) NOT NULL,
-  `from_hash` varchar(70) NOT NULL,
+  `from_hash` varchar(72) NOT NULL,
   `from_index` int(5) NOT NULL,
   PRIMARY KEY (`tx_hash`,`in_index`),
   UNIQUE KEY `from_idx` (`from_hash`,`from_index`)
 ) ;
 
 CREATE TABLE IF NOT EXISTS `utxo_output` (
-  `tx_hash` varchar(70) NOT NULL,
+  `tx_hash` varchar(72) NOT NULL,
   `out_index` int(5) NOT NULL,
   `value` bigint(18) NOT NULL,
   `lock_time` bigint(20) DEFAULT NULL,

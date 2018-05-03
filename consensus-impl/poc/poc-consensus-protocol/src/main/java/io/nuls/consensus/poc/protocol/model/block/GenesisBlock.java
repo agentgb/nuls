@@ -173,7 +173,8 @@ public final class GenesisBlock extends Block {
         this.setHeader(header);
         header.setHeight(height);
         header.setTime(blockTime);
-        header.setPreHash(NulsDigestData.EMPTY_HASH);
+
+        header.setPreHash(NulsDigestData.calcDigestData(new byte[]{0}));
         header.setTxCount(this.getTxs().size());
         List<NulsDigestData> txHashList = new ArrayList<>();
         for (Transaction tx : this.getTxs()) {

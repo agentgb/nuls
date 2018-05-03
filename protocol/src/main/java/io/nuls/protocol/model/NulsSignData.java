@@ -34,8 +34,6 @@ import java.math.BigInteger;
  */
 public class NulsSignData extends BaseNulsData {
 
-    public static final transient NulsSignData EMPTY_SIGN = new NulsSignData(new byte[]{0, 0, 1, 0});
-
     public static transient short SIGN_ALG_ECC = (short) 0;
     public static transient short SIGN_ALG_DEFAULT = NulsSignData.SIGN_ALG_ECC;
 

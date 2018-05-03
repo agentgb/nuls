@@ -24,17 +24,11 @@
 package io.nuls.protocol.model;
 
 
-import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.crypto.Sha256Hash;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.log.Log;
-import io.nuls.protocol.utils.io.NulsByteBuffer;
-import io.nuls.protocol.utils.io.NulsOutputStreamBuffer;
 
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -43,7 +37,6 @@ import java.util.List;
  */
 public class NulsDigestData extends BaseNulsData {
 
-    public static final transient NulsDigestData EMPTY_HASH = new NulsDigestData(new byte[]{0, 0, 1, 0});
     protected short digestAlgType = DIGEST_ALG_SHA256;
     protected byte[] digestBytes;
 
