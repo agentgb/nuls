@@ -62,19 +62,19 @@ public class TxSignValidator implements NulsDataValidator<Transaction> {
         try {
             nulsDigestData = NulsDigestData.calcDigestData(tx.serialize());
         } catch (Exception e) {
-            return ValidateResult.getFailedResult(ErrorCode.DATA_ERROR);
+            return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.DATA_ERROR);
         } finally {
             tx.setScriptSig(scriptSig);
         }
         if (!Arrays.equals(nulsDigestData.getDigestBytes(), tx.getHash().getDigestBytes())) {
-            return ValidateResult.getFailedResult(ErrorCode.DATA_ERROR);
+            return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.DATA_ERROR);
         }
 
         P2PKHScriptSig p2PKHScriptSig = null;
         try {
             p2PKHScriptSig = new NulsByteBuffer(scriptSig).readNulsData(new P2PKHScriptSig());
         } catch (Exception e) {
-            return ValidateResult.getFailedResult(ErrorCode.SIGNATURE_ERROR);
+            return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.SIGNATURE_ERROR);
         }
         return p2PKHScriptSig.verifySign(tx.getHash());
     }

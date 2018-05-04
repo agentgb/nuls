@@ -48,7 +48,7 @@ public class DepositFieldValidator implements NulsDataValidator<PocJoinConsensus
     public ValidateResult validate(PocJoinConsensusTransaction tx) {
         Consensus<Deposit> deposit = tx.getTxData();
         if (deposit.getExtend().getStartTime() <= 0) {
-            return ValidateResult.getFailedResult("start time cannot be 0!");
+            return ValidateResult.getFailedResult(this.getClass().getName(),"start time cannot be 0!");
         }
         return ValidateResult.getSuccessResult();
     }

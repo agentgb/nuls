@@ -78,6 +78,7 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
 
     @Override
     public void afterParse() {
+        this.forceCalcHash();
         coinDataProvider.afterParse(coinData, this);
     }
 

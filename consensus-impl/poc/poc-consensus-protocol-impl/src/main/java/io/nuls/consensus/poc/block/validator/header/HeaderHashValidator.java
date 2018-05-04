@@ -58,7 +58,7 @@ public class HeaderHashValidator implements NulsDataValidator<BlockHeader> {
             data.setScriptSig(scriptSig);
         }
         if (!cfmHash.getDigestHex().equals(hash.getDigestHex())) {
-            result = ValidateResult.getFailedResult(ERROR_MESSAGE);
+            result = ValidateResult.getFailedResult(this.getClass().getName(),ERROR_MESSAGE);
         }
         return result;
     }

@@ -45,30 +45,30 @@ public class RegisterAgentFieldValidator implements NulsDataValidator<RegisterAg
     public ValidateResult validate(RegisterAgentTransaction tx) {
         Consensus<Agent> agent = tx.getTxData();
         if (null == agent) {
-            return ValidateResult.getFailedResult("tx data can not be null!");
+            return ValidateResult.getFailedResult(this.getClass().getName(),"tx data can not be null!");
         }
         if (!Address.validAddress(agent.getAddress()) || !Address.validAddress(agent.getExtend().getPackingAddress())) {
-            return ValidateResult.getFailedResult("Address format wrong!");
+            return ValidateResult.getFailedResult(this.getClass().getName(),"Address format wrong!");
         }
         if (agent.getAddress().equals(agent.getExtend().getPackingAddress())) {
-            return ValidateResult.getFailedResult("It's not safe:agentAddress equals packingAddress");
+            return ValidateResult.getFailedResult(this.getClass().getName(),"It's not safe:agentAddress equals packingAddress");
         }
 
         if (StringUtils.isBlank(agent.getExtend().getAgentName())) {
-            return ValidateResult.getFailedResult("agent name can not be null!");
+            return ValidateResult.getFailedResult(this.getClass().getName(),"agent name can not be null!");
         }
 
         try {
             if (agent.getExtend().getAgentName().getBytes(NulsConfig.DEFAULT_ENCODING).length > 32) {
-                return ValidateResult.getFailedResult("agent name is too long!");
+                return ValidateResult.getFailedResult(this.getClass().getName(),"agent name is too long!");
             }
         } catch (UnsupportedEncodingException e) {
             Log.error(e);
-            return ValidateResult.getFailedResult(e.getMessage());
+            return ValidateResult.getFailedResult(this.getClass().getName(),e.getMessage());
         }
 
         if (agent.getExtend().getStartTime() <= 0) {
-            return ValidateResult.getFailedResult("start time cannot be 0!");
+            return ValidateResult.getFailedResult(this.getClass().getName(),"start time cannot be 0!");
         }
         return ValidateResult.getSuccessResult();
     }

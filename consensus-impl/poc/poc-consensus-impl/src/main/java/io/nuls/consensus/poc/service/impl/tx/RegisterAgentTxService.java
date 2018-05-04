@@ -91,7 +91,7 @@ public class RegisterAgentTxService implements TransactionService<RegisterAgentT
         }
         for (Transaction transaction : txList) {
             if(transaction.getHash().equals(tx.getHash())){
-                return ValidateResult.getFailedResult(ErrorCode.FAILED,"transaction Duplication");
+                return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.FAILED,"transaction Duplication");
             }
             switch (transaction.getType()) {
                 case TransactionConstant.TX_TYPE_REGISTER_AGENT:
@@ -100,13 +100,13 @@ public class RegisterAgentTxService implements TransactionService<RegisterAgentT
                             registerAgentTransaction.getTxData().getAddress().equals(tx.getTxData().getExtend().getPackingAddress())||
                             registerAgentTransaction.getTxData().getExtend().getPackingAddress().equals(tx.getTxData().getAddress())
                             ||registerAgentTransaction.getTxData().getExtend().getPackingAddress().equals(tx.getTxData().getExtend().getPackingAddress())){
-                        return ValidateResult.getFailedResult(ErrorCode.FAILED, "there is a agent has same address!");
+                        return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.FAILED, "there is a agent has same address!");
                     }
                     break;
                 case TransactionConstant.TX_TYPE_RED_PUNISH:
                     RedPunishTransaction redPunishTransaction = (RedPunishTransaction) transaction;
                     if (redPunishTransaction.getTxData().getAddress().equals(tx.getTxData().getAddress())) {
-                        return ValidateResult.getFailedResult(ErrorCode.LACK_OF_CREDIT, "there is a new Red Punish Transaction!");
+                        return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.LACK_OF_CREDIT, "there is a new Red Punish Transaction!");
                     }
                     break;
             }

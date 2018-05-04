@@ -67,10 +67,10 @@ public class AliasValidator implements NulsDataValidator<AliasTransaction> {
     public ValidateResult validate(AliasTransaction tx) {
         Alias alias = tx.getTxData();
         if (!Address.validAddress(alias.getAddress())) {
-            return ValidateResult.getFailedResult(ErrorCode.ADDRESS_ERROR);
+            return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.ADDRESS_ERROR);
         }
         if (!StringUtils.validAlias(alias.getAlias())) {
-            return ValidateResult.getFailedResult(ErrorCode.ALIAS_ERROR);
+            return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.ALIAS_ERROR);
         }
 
         long aliasValue = 0;
@@ -80,7 +80,7 @@ public class AliasValidator implements NulsDataValidator<AliasTransaction> {
         }
 
         if (aliasValue < AccountConstant.ALIAS_NA.getValue() + tx.getFee().getValue()) {
-            return ValidateResult.getFailedResult(ErrorCode.INVALID_INPUT);
+            return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.INVALID_INPUT);
         }
 //
 //        if (tx.getStatus() == TxStatusEnum.UNCONFIRM) {
@@ -92,7 +92,7 @@ public class AliasValidator implements NulsDataValidator<AliasTransaction> {
 //                    }
 //                    Alias a = ((AliasTransaction) trx).getTxData();
 //                    if (alias.getAddress().equals(a.getAddress())) {
-//                        return ValidateResult.getFailedResult(ErrorCode.ACCOUNT_ALREADY_SET_ALIAS);
+//                        return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.ACCOUNT_ALREADY_SET_ALIAS);
 //                    }
 //                    if (alias.getAlias().equals(a.getAlias())) {
 //                        return ValidateResult.getFailedResult("The alias has been occupied");
@@ -103,7 +103,7 @@ public class AliasValidator implements NulsDataValidator<AliasTransaction> {
 
         AliasPo aliasPo = getAliasDataService().get(alias.getAlias());
         if (aliasPo != null) {
-            return ValidateResult.getFailedResult(ErrorCode.ALIAS_EXIST);
+            return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.ALIAS_EXIST);
         }
         return ValidateResult.getSuccessResult();
     }

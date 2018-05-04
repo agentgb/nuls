@@ -18,7 +18,7 @@ public class SmallBlockValidator implements NulsDataValidator<SmallBlock> {
     @Override
     public ValidateResult validate(SmallBlock data) {
         if (null == data || data.getHeader() == null || null == data.getTxHashList() || null == data.getSubTxList() || data.getTxHashList().isEmpty() || data.getSubTxList().isEmpty()) {
-            return ValidateResult.getFailedResult(ErrorCode.DATA_ERROR, "the small block has null field");
+            return ValidateResult.getFailedResult(this.getClass().getName(), ErrorCode.DATA_ERROR, "the small block has null field");
         }
 
         ValidateResult result = data.getHeader().verify();
@@ -26,7 +26,7 @@ public class SmallBlockValidator implements NulsDataValidator<SmallBlock> {
             return result;
         }
         if (!data.getHeader().getMerkleHash().equals(NulsDigestData.calcMerkleDigestData(data.getTxHashList()))) {
-            return ValidateResult.getFailedResult("the MerkleHash is wrong:" + data.getHeader().getHash());
+            return ValidateResult.getFailedResult(this.getClass().getName(), "the MerkleHash is wrong:" + data.getHeader().getHash());
         }
         return ValidateResult.getSuccessResult();
     }

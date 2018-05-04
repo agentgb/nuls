@@ -46,7 +46,7 @@ public class BlockHeaderValidator implements NulsDataValidator<Block> {
     @Override
     public ValidateResult validate(Block data) {
         if(null==data||data.getHeader()==null){
-            return ValidateResult.getFailedResult(ErrorCode.NULL_PARAMETER);
+            return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.NULL_PARAMETER);
         }
         return data.getHeader().verify();
     }

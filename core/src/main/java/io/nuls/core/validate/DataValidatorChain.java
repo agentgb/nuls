@@ -51,12 +51,12 @@ public class DataValidatorChain {
             result = doValidate(data);
         } catch (Exception e) {
             Log.error(e);
-            result = ValidateResult.getFailedResult(e.getMessage());
+            result = ValidateResult.getFailedResult(this.getClass().getName(),e.getMessage());
         }
         boolean b = index.get() == list.size();
         index.remove();
         if (!b && result.isSuccess()) {
-            return ValidateResult.getFailedResult("The Validators not fully executed`");
+            return ValidateResult.getFailedResult(this.getClass().getName(),"The Validators not fully executed`");
         }
         return result;
     }

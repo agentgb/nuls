@@ -38,7 +38,7 @@ public class CommissionRateValidator implements NulsDataValidator<RegisterAgentT
     public ValidateResult validate(RegisterAgentTransaction data) {
         double commissionRate = data.getTxData().getExtend().getCommissionRate();
         if(commissionRate< PocConsensusConstant.MIN_COMMISSION_RATE||commissionRate>PocConsensusConstant.MAX_COMMISSION_RATE){
-            return ValidateResult.getFailedResult(ErrorCode.COMMISSION_RATE_OUT_OF_RANGE);
+            return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.COMMISSION_RATE_OUT_OF_RANGE);
         }
         return ValidateResult.getSuccessResult();
     }

@@ -566,7 +566,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         for (UtxoInput input : txUtxoData.getInputs()) {
             boolean result = outputSet.add(input.getKey());
             if (!result) {
-                return ValidateResult.getFailedResult(ErrorCode.FAILED, "input conflict!");
+                return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.FAILED, "input conflict!");
             }
         }
         return ValidateResult.getSuccessResult();
@@ -577,7 +577,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
 
         if (txList == null || txList.isEmpty()) {
             //It's all an orphan that can go here
-            return ValidateResult.getFailedResult(ErrorCode.ORPHAN_TX);
+            return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.ORPHAN_TX);
         }
 
         UtxoData data = (UtxoData) tx.getCoinData();
@@ -593,10 +593,10 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             if (output == null && tx.getStatus() == TxStatusEnum.UNCONFIRM) {
                 output = outputMap.get(input.getKey());
                 if (null == output) {
-                    return ValidateResult.getFailedResult(ErrorCode.ORPHAN_TX);
+                    return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.ORPHAN_TX);
                 }
             } else if (output == null) {
-                return ValidateResult.getFailedResult(ErrorCode.UTXO_NOT_FOUND);
+                return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.UTXO_NOT_FOUND);
             }
             input.setFrom(output);
             if (tx.getStatus() == TxStatusEnum.UNCONFIRM) {
@@ -606,15 +606,15 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 }
                 if (tx.getType() == TransactionConstant.TX_TYPE_STOP_AGENT) {
                     if (output.getStatus() != OutPutStatusEnum.UTXO_CONSENSUS_LOCK) {
-                        return ValidateResult.getFailedResult(ErrorCode.UTXO_STATUS_CHANGE);
+                        return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.UTXO_STATUS_CHANGE);
                     }
                 } else if (!output.isUsable(height)) {
-                    return ValidateResult.getFailedResult(ErrorCode.UTXO_STATUS_CHANGE);
+                    return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.UTXO_STATUS_CHANGE);
                 }
             }
 //            else if (tx.getStatus() == TxStatusEnum.AGREED) {
 //                if (!output.isSpend()) {
-//                    return ValidateResult.getFailedResult(ErrorCode.UTXO_STATUS_CHANGE);
+//                    return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.UTXO_STATUS_CHANGE);
 //                }
 //            }
 
@@ -623,11 +623,11 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             try {
                 p2PKHScriptSig = P2PKHScriptSig.createFromBytes(tx.getScriptSig());
             } catch (NulsException e) {
-                return ValidateResult.getFailedResult(ErrorCode.DATA_ERROR);
+                return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.DATA_ERROR);
             }
             byte[] user = p2PKHScriptSig.getSignerHash160();
             if (!Arrays.equals(owner, user)) {
-                return ValidateResult.getFailedResult(ErrorCode.INVALID_INPUT);
+                return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.INVALID_INPUT);
             }
         }
         return ValidateResult.getSuccessResult();

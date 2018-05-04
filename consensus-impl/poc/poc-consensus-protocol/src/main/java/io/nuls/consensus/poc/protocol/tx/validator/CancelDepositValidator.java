@@ -41,17 +41,17 @@ public class CancelDepositValidator implements NulsDataValidator<CancelDepositTr
     @Override
     public ValidateResult validate(CancelDepositTransaction data) {
         if (data == null || data.getTxData() == null) {
-            return ValidateResult.getFailedResult(ErrorCode.DATA_ERROR, "deposit tx is null!");
+            return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.DATA_ERROR, "deposit tx is null!");
         }
         NulsDigestData joinTxHash = data.getTxData();
         Transaction tx = ledgerService.getTx(joinTxHash);
         PocJoinConsensusTransaction joinTx = (PocJoinConsensusTransaction) tx;
         if (tx == null || joinTx.getTxData() == null || joinTx.getTxData().getHash() == null || tx.getBlockHeight() < 0) {
-            return ValidateResult.getFailedResult(ErrorCode.FAILED, "The deposit is not exist!");
+            return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.FAILED, "The deposit is not exist!");
         }
         DepositPo po = depositDataService.get(joinTx.getTxData().getHexHash());
         if (null == po || po.getDelHeight() > 0) {
-            return ValidateResult.getFailedResult(ErrorCode.FAILED, "the deposit was deleted!");
+            return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.FAILED, "the deposit was deleted!");
         }
 
         return ValidateResult.getSuccessResult();

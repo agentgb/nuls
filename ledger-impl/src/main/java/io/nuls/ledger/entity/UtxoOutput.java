@@ -23,9 +23,11 @@
  */
 package io.nuls.ledger.entity;
 
+import io.nuls.account.entity.Address;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.str.StringUtils;
+import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.model.BaseNulsData;
 import io.nuls.protocol.model.NulsDigestData;
 import io.nuls.protocol.script.P2PKHScript;
@@ -108,6 +110,9 @@ public class UtxoOutput extends BaseNulsData {
     }
 
     public String getAddress() {
+        if(null==address){
+            address = new Address(NulsContext.DEFAULT_CHAIN_ID, this.getOwner()).getBase58();
+        }
         return address;
     }
 

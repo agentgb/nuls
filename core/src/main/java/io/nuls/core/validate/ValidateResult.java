@@ -35,16 +35,19 @@ public class ValidateResult<T> extends Result<T> {
 
     private SeverityLevelEnum level;
 
-    public static ValidateResult getFailedResult(String msg) {
-        return getFailedResult(SeverityLevelEnum.WRONG, msg);
+    private String className;
+
+    public static ValidateResult getFailedResult(String className,String msg) {
+        return getFailedResult(className,SeverityLevelEnum.WRONG, msg);
     }
 
-    public static ValidateResult getFailedResult(SeverityLevelEnum level, String msg) {
+    public static ValidateResult getFailedResult(String className,SeverityLevelEnum level, String msg) {
         ValidateResult result = new ValidateResult();
         result.setSuccess(false);
         result.setErrorCode(ErrorCode.VERIFICATION_FAILD);
         result.setMessage(msg);
         result.setLevel(level);
+        result.setClassName(className);
         return result;
     }
 
@@ -55,15 +58,16 @@ public class ValidateResult<T> extends Result<T> {
         return result;
     }
 
-    public static ValidateResult getFailedResult(ErrorCode msg) {
-        return getFailedResult(SeverityLevelEnum.WRONG, msg);
+    public static ValidateResult getFailedResult(String className,ErrorCode msg) {
+        return getFailedResult(className,SeverityLevelEnum.WRONG, msg);
     }
 
-    public static ValidateResult getFailedResult(SeverityLevelEnum level, ErrorCode errorCode) {
+    public static ValidateResult getFailedResult(String className,SeverityLevelEnum level, ErrorCode errorCode) {
         ValidateResult result = new ValidateResult();
         result.setSuccess(false);
         result.setLevel(level);
         result.setErrorCode(errorCode);
+        result.setClassName(className);
         return result;
     }
 
@@ -75,9 +79,17 @@ public class ValidateResult<T> extends Result<T> {
         this.level = level;
     }
 
-    public static ValidateResult getFailedResult(ErrorCode errorCode, String msg) {
-        ValidateResult vr = getFailedResult(errorCode);
+    public static ValidateResult getFailedResult(String className,ErrorCode errorCode, String msg) {
+        ValidateResult vr = getFailedResult(className,errorCode);
         vr.setMessage(msg);
         return vr;
+    }
+
+    public String getClassName() {
+        return className;
+    }
+
+    public void setClassName(String className) {
+        this.className = className;
     }
 }

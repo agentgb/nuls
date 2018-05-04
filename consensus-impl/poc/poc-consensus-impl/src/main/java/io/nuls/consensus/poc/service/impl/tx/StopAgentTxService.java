@@ -137,10 +137,10 @@ public class StopAgentTxService implements TransactionService<StopAgentTransacti
     public ValidateResult conflictDetect(StopAgentTransaction tx, List<Transaction> txList) {
         for (Transaction transaction : txList) {
             if (transaction.getHash().equals(tx.getHash())) {
-                return ValidateResult.getFailedResult(ErrorCode.FAILED, "transaction Duplication");
+                return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.FAILED, "transaction Duplication");
             }
             if (tx.getTxData().equals(transaction.getTxData())) {
-                return ValidateResult.getFailedResult(ErrorCode.FAILED, "stop agent transaction Duplication");
+                return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.FAILED, "stop agent transaction Duplication");
             }
         }
         return ValidateResult.getSuccessResult();

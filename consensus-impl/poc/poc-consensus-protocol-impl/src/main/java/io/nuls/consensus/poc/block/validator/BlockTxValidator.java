@@ -56,14 +56,14 @@ public class BlockTxValidator implements NulsDataValidator<Block> {
     @Override
     public ValidateResult validate(Block block) {
         if (block.getHeader().getTxCount() != block.getTxs().size()) {
-            return ValidateResult.getFailedResult("txCount is wrong!");
+            return ValidateResult.getFailedResult(this.getClass().getName(),"txCount is wrong!");
         }
         int count = 0;
         List<Transaction> txList = new ArrayList<>();
         for (Transaction tx : block.getTxs()) {
             ValidateResult result = this.ledgerService.verifyTx(tx,txList);
             if (null==result||result.isFailed()) {
-                return ValidateResult.getFailedResult("there is wrong transaction!msg:"+result.getMessage());
+                return ValidateResult.getFailedResult(this.getClass().getName(),"there is wrong transaction!msg:"+result.getMessage());
             }
             if (tx.getType() == TransactionConstant.TX_TYPE_COIN_BASE) {
                 count++;
@@ -71,7 +71,7 @@ public class BlockTxValidator implements NulsDataValidator<Block> {
             txList.add(tx);
         }
         if (count > 1) {
-            return ValidateResult.getFailedResult("coinbase transaction must only one!");
+            return ValidateResult.getFailedResult(this.getClass().getName(),"coinbase transaction must only one!");
         }
         return ValidateResult.getSuccessResult();
     }

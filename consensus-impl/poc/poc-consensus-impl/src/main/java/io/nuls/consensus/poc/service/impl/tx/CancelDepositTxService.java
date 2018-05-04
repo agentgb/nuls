@@ -148,11 +148,11 @@ public class CancelDepositTxService implements TransactionService<CancelDepositT
     public ValidateResult conflictDetect(CancelDepositTransaction tx, List<Transaction> txList) {
         for (Transaction transaction : txList) {
             if (transaction.getHash().equals(tx.getHash())) {
-                return ValidateResult.getFailedResult(ErrorCode.FAILED, "transaction Duplication");
+                return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.FAILED, "transaction Duplication");
             }
 
             if(tx.getTxData().equals(transaction.getTxData())){
-                return ValidateResult.getFailedResult(ErrorCode.FAILED, "Cancel deposit transaction Duplication");
+                return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.FAILED, "Cancel deposit transaction Duplication");
             }
 
         }

@@ -67,7 +67,7 @@ public class BlockFieldValidator implements NulsDataValidator<Block> {
 
         } while (false);
         if (failed) {
-            result = ValidateResult.getFailedResult(ERROR_MESSAGE);
+            result = ValidateResult.getFailedResult(this.getClass().getName(),ERROR_MESSAGE);
         }
         return result;
     }

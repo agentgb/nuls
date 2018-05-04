@@ -42,18 +42,18 @@ public class AgentDepositValidator implements NulsDataValidator<RegisterAgentTra
         ValidateResult result = ValidateResult.getSuccessResult();
         Agent agent = tx.getTxData().getExtend();
         if (null == agent) {
-            return ValidateResult.getFailedResult(ErrorCode.NULL_PARAMETER);
+            return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.NULL_PARAMETER);
         }
         if (PocConsensusConstant.AGENT_DEPOSIT_LOWER_LIMIT.isGreaterThan(agent.getDeposit())) {
-            return ValidateResult.getFailedResult(ErrorCode.DEPOSIT_NOT_ENOUGH);
+            return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.DEPOSIT_NOT_ENOUGH);
         }
 
         try {
             if (!agent.getDeposit().equals(tx.getCoinData().getTotalNa())) {
-                return ValidateResult.getFailedResult(SeverityLevelEnum.FLAGRANT_FOUL, ErrorCode.DEPOSIT_ERROR);
+                return ValidateResult.getFailedResult(this.getClass().getName(),SeverityLevelEnum.FLAGRANT_FOUL, ErrorCode.DEPOSIT_ERROR);
             }
         } catch (NulsException e) {
-            return ValidateResult.getFailedResult(e.getErrorCode(),e.getMessage());
+            return ValidateResult.getFailedResult(this.getClass().getName(),e.getErrorCode(),e.getMessage());
         }
         return result;
     }

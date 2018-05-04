@@ -55,13 +55,13 @@ public class UtxoTxOutputsValidator implements NulsDataValidator<AbstractCoinTra
         UtxoData utxoData = (UtxoData) tx.getCoinData();
         List<UtxoOutput> outputs = utxoData.getOutputs();
         if (null != outputs && outputs.size() > MAX_OUTPUT_COUNT) {
-            return ValidateResult.getFailedResult(ERROR_MESSAGE);
+            return ValidateResult.getFailedResult(this.getClass().getName(),ERROR_MESSAGE);
         }
 
         if (null != outputs) {
             for (UtxoOutput output : outputs) {
                 if (output.getValue() >= Na.MAX_NA_VALUE) {
-                    return ValidateResult.getFailedResult(ErrorCode.INVALID_AMOUNT);
+                    return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.INVALID_AMOUNT);
                 }
             }
         }

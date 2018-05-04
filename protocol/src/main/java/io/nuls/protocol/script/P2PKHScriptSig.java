@@ -76,7 +76,7 @@ public class P2PKHScriptSig extends Script {
         if(b){
             return ValidateResult.getSuccessResult();
         }else {
-            return ValidateResult.getFailedResult(ErrorCode.SIGNATURE_ERROR);
+            return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.SIGNATURE_ERROR);
         }
     }
 

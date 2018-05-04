@@ -70,7 +70,7 @@ public class HeaderFieldValidator implements NulsDataValidator<BlockHeader> {
             }
         } while (false);
         if (failed) {
-            result = ValidateResult.getFailedResult(ERROR_MESSAGE);
+            result = ValidateResult.getFailedResult(this.getClass().getName(),ERROR_MESSAGE);
         }
         return result;
     }

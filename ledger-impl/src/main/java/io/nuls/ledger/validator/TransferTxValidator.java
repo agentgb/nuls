@@ -40,7 +40,7 @@ public class TransferTxValidator implements NulsDataValidator<AbstractCoinTransa
         }
 
         if (inTotal != tx.getFee().getValue() + outTotal) {
-            return ValidateResult.getFailedResult(ErrorCode.INVALID_AMOUNT);
+            return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.INVALID_AMOUNT);
         }
         return ValidateResult.getSuccessResult();
     }

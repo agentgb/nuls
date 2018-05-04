@@ -57,7 +57,7 @@ public class DepositCountValidator implements NulsDataValidator<PocJoinConsensus
         Consensus<Deposit> cd = tx.getTxData();
         List<DepositPo> list = depositDataService.getEffectiveList(null,NulsContext.getInstance().getBestHeight(),cd.getExtend().getAgentHash(), null);
         if (null != list && list.size() >= PocConsensusConstant.MAX_ACCEPT_NUM_OF_DEPOSIT) {
-            return ValidateResult.getFailedResult(ErrorCode.DEPOSIT_OVER_COUNT);
+            return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.DEPOSIT_OVER_COUNT);
         }
         return ValidateResult.getSuccessResult();
     }

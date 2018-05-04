@@ -137,22 +137,22 @@ public class JoinConsensusTxService implements TransactionService<PocJoinConsens
         }
         AgentPo agent = agentDataService.get(tx.getTxData().getExtend().getAgentHash());
         if (null == agent) {
-            return ValidateResult.getFailedResult("the agent is not exist!");
+            return ValidateResult.getFailedResult(this.getClass().getName(), "the agent is not exist!");
         }
         RegisterAgentTransaction registerAgentTransaction = (RegisterAgentTransaction) this.ledgerService.getTx(NulsDigestData.fromDigestHex(agent.getTxHash()));
         if (null == registerAgentTransaction) {
-            return ValidateResult.getFailedResult(ErrorCode.DATA_ERROR, "the agent's txHash is wrong!");
+            return ValidateResult.getFailedResult(this.getClass().getName(), ErrorCode.DATA_ERROR, "the agent's txHash is wrong!");
         }
         Long value = 0L;
         for (Transaction transaction : txList) {
             if (transaction.getHash().equals(tx.getHash())) {
-                return ValidateResult.getFailedResult(ErrorCode.FAILED, "transaction Duplication");
+                return ValidateResult.getFailedResult(this.getClass().getName(), ErrorCode.FAILED, "transaction Duplication");
             }
             switch (transaction.getType()) {
                 case TransactionConstant.TX_TYPE_STOP_AGENT:
                     StopAgentTransaction stopAgentTransaction = (StopAgentTransaction) transaction;
                     if (stopAgentTransaction.getHash().getDigestHex().equals(agent.getTxHash())) {
-                        return ValidateResult.getFailedResult(ErrorCode.FAILED, "the agent has been stoped!");
+                        return ValidateResult.getFailedResult(this.getClass().getName(), ErrorCode.FAILED, "the agent has been stoped!");
                     }
                     break;
                 case TransactionConstant.TX_TYPE_JOIN_CONSENSUS:
@@ -162,7 +162,7 @@ public class JoinConsensusTxService implements TransactionService<PocJoinConsens
                 case TransactionConstant.TX_TYPE_RED_PUNISH:
                     RedPunishTransaction redPunishTransaction = (RedPunishTransaction) transaction;
                     if (redPunishTransaction.getTxData().getAddress().equals(agent.getAgentAddress())) {
-                        return ValidateResult.getFailedResult(ErrorCode.LACK_OF_CREDIT, "there is a new Red Punish Transaction of the agent address!");
+                        return ValidateResult.getFailedResult(this.getClass().getName(), ErrorCode.LACK_OF_CREDIT, "there is a new Red Punish Transaction of the agent address!");
                     }
                     break;
             }
@@ -174,7 +174,7 @@ public class JoinConsensusTxService implements TransactionService<PocJoinConsens
                 allready += po.getDeposit();
             }
             if ((allready + value + tx.getTxData().getExtend().getDeposit().getValue()) > PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_UPPER_LIMIT.getValue()) {
-                return ValidateResult.getFailedResult("there is too much deposit of the agent!");
+                return ValidateResult.getFailedResult(this.getClass().getName(), "there is too much deposit of the agent!");
             }
         }
         return ValidateResult.getSuccessResult();

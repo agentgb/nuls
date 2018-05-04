@@ -69,19 +69,19 @@ public class DepositAmountValidator implements NulsDataValidator<PocJoinConsensu
             total = total.add(Na.valueOf(cd.getDeposit()));
         }
         if (limit.isGreaterThan(data.getTxData().getExtend().getDeposit())) {
-            return ValidateResult.getFailedResult(ErrorCode.DEPOSIT_NOT_ENOUGH);
+            return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.DEPOSIT_NOT_ENOUGH);
         }
         if (max.isLessThan(total.add(data.getTxData().getExtend().getDeposit()))) {
-            return ValidateResult.getFailedResult(ErrorCode.DEPOSIT_TOO_MUCH);
+            return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.DEPOSIT_TOO_MUCH);
         }
 
         try {
             if (!data.getTxData().getExtend().getDeposit().equals(data.getCoinData().getTotalNa())) {
-                return ValidateResult.getFailedResult(SeverityLevelEnum.FLAGRANT_FOUL, ErrorCode.DEPOSIT_ERROR);
+                return ValidateResult.getFailedResult(this.getClass().getName(),SeverityLevelEnum.FLAGRANT_FOUL, ErrorCode.DEPOSIT_ERROR);
             }
         } catch (NulsException e) {
             Log.error(e);
-            return ValidateResult.getFailedResult(e.getErrorCode(),e.getMessage());
+            return ValidateResult.getFailedResult(this.getClass().getName(),e.getErrorCode(),e.getMessage());
         }
 
         return ValidateResult.getSuccessResult();

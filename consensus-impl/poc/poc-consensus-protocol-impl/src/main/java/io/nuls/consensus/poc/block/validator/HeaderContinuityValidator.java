@@ -65,10 +65,10 @@ public class HeaderContinuityValidator implements NulsDataValidator<BlockHeader>
                 preHeader = NulsContext.getServiceBean(BlockService.class).getBlockHeader(header.getPreHash().getDigestHex());
             } catch (NulsException e) {
                 Log.error(e);
-                return ValidateResult.getFailedResult(ErrorCode.ORPHAN_BLOCK);
+                return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.ORPHAN_BLOCK);
             }
             if (null == preHeader) {
-                return ValidateResult.getFailedResult(ErrorCode.ORPHAN_BLOCK);
+                return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.ORPHAN_BLOCK);
             }
             BlockRoundData roundData = new BlockRoundData();
             roundData.parse(header.getExtend());
@@ -82,7 +82,7 @@ public class HeaderContinuityValidator implements NulsDataValidator<BlockHeader>
             }
         } while (false);
         if (failed) {
-            result = ValidateResult.getFailedResult(ERROR_MESSAGE);
+            result = ValidateResult.getFailedResult(this.getClass().getName(),ERROR_MESSAGE);
         }
         return result;
     }

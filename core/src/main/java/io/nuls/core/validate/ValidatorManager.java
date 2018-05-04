@@ -52,7 +52,7 @@ public class ValidatorManager {
 
     public static ValidateResult startDoValidator(NulsData data) {
         if (data == null) {
-            return ValidateResult.getFailedResult(ErrorCode.NULL_PARAMETER);
+            return ValidateResult.getFailedResult(ValidatorManager.class.getName(),ErrorCode.NULL_PARAMETER);
         }
         DataValidatorChain chain = chainMap.get(data.getClass());
         if (null == chain) {

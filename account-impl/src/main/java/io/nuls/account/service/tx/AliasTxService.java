@@ -107,7 +107,7 @@ public class AliasTxService implements TransactionService<AliasTransaction> {
             AliasTransaction aliasTransaction = (AliasTransaction) transaction;
             if (aliasTransaction.getTxData().getAddress().equals(tx.getTxData().getAddress()) ||
                     aliasTransaction.getTxData().getAlias().equals(tx.getTxData().getAlias())) {
-                return ValidateResult.getFailedResult(ErrorCode.FAILED, "tx conflict!");
+                return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.FAILED, "tx conflict!");
             }
         }
         return ValidateResult.getSuccessResult();

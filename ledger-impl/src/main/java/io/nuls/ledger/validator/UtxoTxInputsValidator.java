@@ -68,9 +68,9 @@ public class UtxoTxInputsValidator implements NulsDataValidator<AbstractCoinTran
             UtxoOutput output = ledgerCacheService.getUtxo(input.getKey());
 
             if (output == null && tx.getStatus() == TxStatusEnum.UNCONFIRM) {
-                return ValidateResult.getFailedResult(ErrorCode.ORPHAN_TX);
+                return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.ORPHAN_TX);
             } else if (output == null) {
-                return ValidateResult.getFailedResult(ErrorCode.UTXO_NOT_FOUND);
+                return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.UTXO_NOT_FOUND);
             }
 
             long blockHeight = tx.getBlockHeight();
@@ -81,10 +81,10 @@ public class UtxoTxInputsValidator implements NulsDataValidator<AbstractCoinTran
             if (tx.getStatus() == TxStatusEnum.UNCONFIRM) {
                 if (tx.getType() == TransactionConstant.TX_TYPE_STOP_AGENT) {
                     if (output.getStatus() != OutPutStatusEnum.UTXO_CONSENSUS_LOCK) {
-                        return ValidateResult.getFailedResult(ErrorCode.UTXO_STATUS_CHANGE);
+                        return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.UTXO_STATUS_CHANGE);
                     }
                 } else if (!output.isUsable(blockHeight)) {
-                    return ValidateResult.getFailedResult(ErrorCode.UTXO_STATUS_CHANGE);
+                    return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.UTXO_STATUS_CHANGE);
                 }
             }
 
@@ -93,11 +93,11 @@ public class UtxoTxInputsValidator implements NulsDataValidator<AbstractCoinTran
             try {
                 p2PKHScriptSig = P2PKHScriptSig.createFromBytes(tx.getScriptSig());
             } catch (NulsException e) {
-                return ValidateResult.getFailedResult(ErrorCode.DATA_ERROR);
+                return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.DATA_ERROR);
             }
             byte[] user = p2PKHScriptSig.getSignerHash160();
             if (!Arrays.equals(owner, user)) {
-                return ValidateResult.getFailedResult(ErrorCode.INVALID_INPUT);
+                return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.INVALID_INPUT);
             }
         }
         return ValidateResult.getSuccessResult();

@@ -37,17 +37,17 @@ public class StopAgentValidator implements NulsDataValidator<StopAgentTransactio
     @Override
     public ValidateResult validate(StopAgentTransaction data) {
         if (data == null || data.getTxData() == null) {
-            return ValidateResult.getFailedResult(ErrorCode.DATA_ERROR, "stop agent tx is null!");
+            return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.DATA_ERROR, "stop agent tx is null!");
         }
         NulsDigestData joinTxHash = data.getTxData();
         Transaction tx = ledgerService.getTx(joinTxHash);
         RegisterAgentTransaction agentTransaction = (RegisterAgentTransaction) tx;
         if (tx == null || agentTransaction.getTxData() == null || agentTransaction.getTxData().getHash() == null || tx.getBlockHeight() < 0) {
-            return ValidateResult.getFailedResult(ErrorCode.FAILED, "The agent is not exist!");
+            return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.FAILED, "The agent is not exist!");
         }
         AgentPo po = agentDataService.get(agentTransaction.getTxData().getHexHash());
         if (null == po || po.getDelHeight() > 0) {
-            return ValidateResult.getFailedResult(ErrorCode.FAILED, "the agent was deleted!");
+            return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.FAILED, "the agent was deleted!");
         }
 
         return ValidateResult.getSuccessResult();

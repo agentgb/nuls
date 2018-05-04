@@ -52,7 +52,7 @@ public class AgentExistValidator implements NulsDataValidator<PocJoinConsensusTr
     public ValidateResult validate(PocJoinConsensusTransaction tx) {
         AgentPo ca = agentDataService.get(tx.getTxData().getExtend().getAgentHash());
         if (ca == null) {
-            return ValidateResult.getFailedResult(ErrorCode.ORPHAN_TX,"Agent is not exist!");
+            return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.ORPHAN_TX,"Agent is not exist!");
         }
         return ValidateResult.getSuccessResult();
     }

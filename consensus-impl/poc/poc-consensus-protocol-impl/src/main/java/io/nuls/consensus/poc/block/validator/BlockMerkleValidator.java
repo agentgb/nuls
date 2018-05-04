@@ -47,7 +47,7 @@ public class BlockMerkleValidator implements NulsDataValidator<Block> {
 
     @Override
     public ValidateResult validate(Block data) {
-        ValidateResult result = ValidateResult.getFailedResult(ERROR_MESSAGE);
+        ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(),ERROR_MESSAGE);
         do {
             if (null == data) {
                 result.setMessage("Data is null!");

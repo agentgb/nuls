@@ -44,7 +44,7 @@ public class HeaderSignValidator implements NulsDataValidator<BlockHeader> {
     @Override
     public ValidateResult validate(BlockHeader data) {
         if(data.getScriptSig()==null){
-            return ValidateResult.getFailedResult(ERROR_MESSAGE);
+            return ValidateResult.getFailedResult(this.getClass().getName(),ERROR_MESSAGE);
         }
         ValidateResult verifyRsult = data.getScriptSig().verifySign(data.getHash());
         return verifyRsult;

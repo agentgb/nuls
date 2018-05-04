@@ -50,7 +50,7 @@ public class AmountValidator implements NulsDataValidator<AbstractCoinTransactio
             long inTotal = 0;
             for (int i = 0; i < data.getInputs().size(); i++) {
                 if(data.getInputs().get(i).getFrom()==null){
-                    return ValidateResult.getFailedResult(ErrorCode.ORPHAN_TX);
+                    return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.ORPHAN_TX);
                 }
                 inTotal += data.getInputs().get(i).getFrom().getValue();
             }
@@ -61,7 +61,7 @@ public class AmountValidator implements NulsDataValidator<AbstractCoinTransactio
                     long amount = data.getOutputs().get(i).getValue();
                     //todo:  validate overflow attack
                     if (amount > Na.MAX_NA_VALUE) {
-                        return ValidateResult.getFailedResult(ErrorCode.INVALID_AMOUNT);
+                        return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.INVALID_AMOUNT);
                     }
                     outTotal += amount;
                 }
@@ -69,7 +69,7 @@ public class AmountValidator implements NulsDataValidator<AbstractCoinTransactio
             }
             long fee = 1000000;
             if (outTotal + fee > inTotal) {
-                return ValidateResult.getFailedResult(ErrorCode.INVALID_AMOUNT);
+                return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.INVALID_AMOUNT);
             }
         } else {// coinbase
             //todo :validate the amount for every staker
