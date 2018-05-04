@@ -47,9 +47,8 @@ import java.util.List;
 public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Transaction<T> {
 
     protected static CoinDataProvider coinDataProvider;
-
     protected CoinData coinData;
-    private boolean skipInputValidator;
+    private transient boolean skipInputValidator;
 
     public AbstractCoinTransaction(int type) {
         super(type);

@@ -27,6 +27,7 @@ import io.nuls.consensus.poc.protocol.tx.entity.YellowPunishData;
 import io.nuls.consensus.poc.protocol.tx.validator.YellowPunishValidator;
 import io.nuls.ledger.entity.tx.AbstractNoneCoinTransaction;
 import io.nuls.protocol.constant.TransactionConstant;
+import io.nuls.protocol.model.Transaction;
 
 /**
  * @author Niels

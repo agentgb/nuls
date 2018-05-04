@@ -50,5 +50,4 @@ public class LockNulsTransaction<T extends BaseNulsData>  extends AbstractCoinTr
     protected LockNulsTransaction(int type) {
         super(type);
     }
-
 }

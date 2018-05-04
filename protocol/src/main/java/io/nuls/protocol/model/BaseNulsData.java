@@ -66,7 +66,7 @@ public abstract class BaseNulsData implements NulsData, Serializable, Cloneable 
         return ProtostuffIOUtil.toByteArray(this, schema, LinkedBuffer.allocate(LinkedBuffer.DEFAULT_BUFFER_SIZE));
     }
 
-    public final void parse(byte[] bytes)  {
+    public final void parse(byte[] bytes) {
         if (bytes == null || bytes.length == 0) {
             return;
         }

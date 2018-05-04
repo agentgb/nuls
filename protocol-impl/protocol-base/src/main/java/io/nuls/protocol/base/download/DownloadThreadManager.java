@@ -241,8 +241,8 @@ public class DownloadThreadManager implements Callable<Boolean> {
             Block remoteBlock = downloadUtils.getBlockByHash(localBestBlock.getHeader().getHash().getDigestHex(), node);
             if(remoteBlock != null && remoteBlock.getHeader().getHeight() == localBestBlock.getHeader().getHeight()) {
                 return;
-            }
         }
+    }
 
         if(newestInfos.getNodes().size() >= PocConsensusConstant.ALIVE_MIN_NODE_COUNT) {
             consensusService.rollbackBlock(localBestBlock);

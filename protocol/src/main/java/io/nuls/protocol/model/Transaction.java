@@ -23,10 +23,15 @@
  */
 package io.nuls.protocol.model;
 
+import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.date.TimeService;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.protocol.constant.TxStatusEnum;
 import io.nuls.protocol.utils.TransactionValidatorManager;
+import io.protostuff.LinkedBuffer;
+import io.protostuff.ProtostuffIOUtil;
+import io.protostuff.runtime.RuntimeSchema;
 
 import java.util.List;
 
@@ -34,7 +39,7 @@ import java.util.List;
  * @author Niels
  * @date 2017/10/30
  */
-public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData {
+public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData implements Cloneable {
 
     protected int type;
 
@@ -73,10 +78,20 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData {
     }
 
     protected void forceCalcHash() {
-        byte[] tempSig = this.scriptSig;
-        this.scriptSig = null;
-        this.hash = NulsDigestData.calcDigestData(this.serialize());
-        this.scriptSig = tempSig;
+        this.hash = NulsDigestData.calcDigestData(this.serializeForHash());
+    }
+
+
+    public final byte[] serializeForHash() {
+        RuntimeSchema schema = SCHEMA_MAP.get(this.getClass());
+        Transaction tx = null;
+        try {
+            tx = (Transaction) this.clone();
+        } catch (CloneNotSupportedException e) {
+            Log.error(e);
+        }
+        tx.setScriptSig(null);
+        return ProtostuffIOUtil.toByteArray(tx, schema, LinkedBuffer.allocate(LinkedBuffer.DEFAULT_BUFFER_SIZE));
     }
 
     public Transaction(int type) {
