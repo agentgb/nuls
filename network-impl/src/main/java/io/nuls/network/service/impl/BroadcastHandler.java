@@ -362,26 +362,26 @@ public class BroadcastHandler {
     }
 
     private BroadcastResult broadcast(NulsMessage message, Node node, boolean asyn) throws IOException {
-        try {
-            if (!node.isAlive() && node.getChannelId() == null) {
-                return new BroadcastResult(false, "node not found");
-            }
-            SocketChannel channel = NioChannelMap.get(node.getChannelId());
-            if (channel == null) {
-                return new BroadcastResult(false, "node not found");
-            }
-            ChannelFuture future = channel.writeAndFlush(Unpooled.wrappedBuffer(message.serialize()));
-            if (!asyn) {
-                future.await();
-                boolean success = future.isSuccess();
-                if (!success) {
-                    return new BroadcastResult(false, "send message failed");
-                }
-            }
-        } catch (Exception e) {
-            Log.error(e);
-            return new BroadcastResult(false, "send message failed");
-        }
+//        try {
+//            if (!node.isAlive() && node.getChannelId() == null) {
+//                return new BroadcastResult(false, "node not found");
+//            }
+//            SocketChannel channel = NioChannelMap.get(node.getChannelId());
+//            if (channel == null) {
+//                return new BroadcastResult(false, "node not found");
+//            }
+//            ChannelFuture future = channel.writeAndFlush(Unpooled.wrappedBuffer(message.serialize()));
+//            if (!asyn) {
+//                future.await();
+//                boolean success = future.isSuccess();
+//                if (!success) {
+//                    return new BroadcastResult(false, "send message failed");
+//                }
+//            }
+//        } catch (Exception e) {
+//            Log.error(e);
+//            return new BroadcastResult(false, "send message failed");
+//        }
         return new BroadcastResult(true, "OK");
     }
 
