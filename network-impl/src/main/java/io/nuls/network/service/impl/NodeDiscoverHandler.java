@@ -109,16 +109,16 @@ public class NodeDiscoverHandler implements Runnable {
      * @param size
      */
     public void findOtherNode(int size) {
-        GetNodeEvent event = new GetNodeEvent(size);
-        List<Node> nodeList = new ArrayList<>(nodesManager.getAvailableNodes());
-        Collections.shuffle(nodeList);
-        for (int i = 0; i < nodeList.size(); i++) {
-            if (i == 2) {
-                break;
-            }
-            Node node = nodeList.get(i);
-            broadcaster.broadcastToNode(event, node, true);
-        }
+//        GetNodeEvent event = new GetNodeEvent(size);
+//        List<Node> nodeList = new ArrayList<>(nodesManager.getAvailableNodes());
+//        Collections.shuffle(nodeList);
+//        for (int i = 0; i < nodeList.size(); i++) {
+//            if (i == 2) {
+//                break;
+//            }
+//            Node node = nodeList.get(i);
+//            broadcaster.broadcastToNode(event, node, true);
+//        }
     }
 
     /**
@@ -128,43 +128,43 @@ public class NodeDiscoverHandler implements Runnable {
 
     @Override
     public void run() {
-        Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
-
-        while (running) {
-            count++;
-            Collection<Node> nodeList = nodesManager.getAvailableNodes();
-            Block block = NulsContext.getInstance().getBestBlock();
-            GetVersionEvent event = new GetVersionEvent(network.getPort(), block.getHeader().getHeight(), block.getHeader().getHash().getDigestHex());
-            GetNodesIpEvent ipEvent = new GetNodesIpEvent();
-            for (Node node : nodeList) {
-                if (node.getType() == Node.OUT) {
-                    broadcaster.broadcastToNode(event, node, true);
-                }
-                if (count == 3) {
-                    broadcaster.broadcastToNode(ipEvent, node, true);
-                }
-            }
-
-            long now = TimeService.currentTimeMillis();
-            if (count == 3) {
-                count = 0;
-                List<String> list = new ArrayList<>();
-                for (Map.Entry<String, Long> entry : NetworkContext.ipMap.entrySet()) {
-                    if (now - entry.getValue() > DateUtil.MINUTE_TIME * 2) {
-                        list.add(entry.getKey());
-                    }
-                }
-                for (String ip : list) {
-                    NetworkContext.ipMap.remove(ip);
-                }
-            }
-
-            try {
-                Thread.sleep(10000);
-            } catch (InterruptedException e) {
-                Log.error(e);
-            }
-        }
+//        Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
+//
+//        while (running) {
+//            count++;
+//            Collection<Node> nodeList = nodesManager.getAvailableNodes();
+//            Block block = NulsContext.getInstance().getBestBlock();
+//            GetVersionEvent event = new GetVersionEvent(network.getPort(), block.getHeader().getHeight(), block.getHeader().getHash().getDigestHex());
+//            GetNodesIpEvent ipEvent = new GetNodesIpEvent();
+//            for (Node node : nodeList) {
+//                if (node.getType() == Node.OUT) {
+//                    broadcaster.broadcastToNode(event, node, true);
+//                }
+//                if (count == 3) {
+//                    broadcaster.broadcastToNode(ipEvent, node, true);
+//                }
+//            }
+//
+//            long now = TimeService.currentTimeMillis();
+//            if (count == 3) {
+//                count = 0;
+//                List<String> list = new ArrayList<>();
+//                for (Map.Entry<String, Long> entry : NetworkContext.ipMap.entrySet()) {
+//                    if (now - entry.getValue() > DateUtil.MINUTE_TIME * 2) {
+//                        list.add(entry.getKey());
+//                    }
+//                }
+//                for (String ip : list) {
+//                    NetworkContext.ipMap.remove(ip);
+//                }
+//            }
+//
+//            try {
+//                Thread.sleep(10000);
+//            } catch (InterruptedException e) {
+//                Log.error(e);
+//            }
+//        }
     }
 
     public void setNetwork(NetworkParam network) {
