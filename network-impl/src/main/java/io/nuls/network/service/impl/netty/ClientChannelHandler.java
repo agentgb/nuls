@@ -34,14 +34,14 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
         Attribute<Node> nodeAttribute = channel.attr(key);
         Node node = nodeAttribute.get();
         String nodeId = node == null ? null : node.getId();
-        Log.debug("---------------------- client channelRegistered -----------" + nodeId);
+        Log.info("---------------------- client channelRegistered -----------" + nodeId);
 
         Map<String, Node> nodes = getNetworkService().getNodes();
         // If a node with the same IP already in nodes, as a out node, can not add anymore
         for (Node n : nodes.values()) {
             //both ip and port equals , it means the node is myself
             if (n.getIp().equals(node.getIp()) && !n.getPort().equals(node.getSeverPort())) {
-                Log.debug("----------------------client: it already had a connection: " + n.getId() + " type:" + n.getType() + ", this connection: " + nodeId + "---------------------- ");
+                Log.info("----------------------client: it already had a connection: " + n.getId() + " type:" + n.getType() + ", this connection: " + nodeId + "---------------------- ");
                 ctx.channel().close();
                 return;
             }
@@ -53,8 +53,8 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
         String channelId = ctx.channel().id().asLongText();
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-        Log.debug(" ---------------------- client channelActive ----------" + nodeId);
-        Log.debug("localInfo: "+channel.localAddress().getHostString()+":" + channel.localAddress().getPort());
+        Log.info(" ---------------------- client channelActive ----------" + nodeId);
+        Log.info("localInfo: "+channel.localAddress().getHostString()+":" + channel.localAddress().getPort());
 
         Attribute<Node> nodeAttribute = channel.attr(key);
         Node node = nodeAttribute.get();
@@ -77,8 +77,8 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-        Log.debug(" ---------------------- client channelInactive ---------------------- " + nodeId);
-        Log.debug("localInfo: "+channel.localAddress().getHostString()+":" + channel.localAddress().getPort());
+        Log.info(" ---------------------- client channelInactive ---------------------- " + nodeId);
+        Log.info("localInfo: "+channel.localAddress().getHostString()+":" + channel.localAddress().getPort());
 
         String channelId = ctx.channel().id().asLongText();
         NioChannelMap.remove(channelId);
@@ -88,7 +88,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
 //                System.out.println(  "---------------client channelInactive remove node----------------" + nodeId);
                 getNetworkService().removeNode(node.getId());
             } else {
-                Log.debug("---------------- client channelId different----------------" + channelId + "," + node.getChannelId());
+                Log.info("---------------- client channelId different----------------" + channelId + "," + node.getChannelId());
             }
         }
     }
@@ -112,7 +112,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        Log.debug("--------------- ClientChannelHandler exceptionCaught :" + cause.getMessage());
+        Log.info("--------------- ClientChannelHandler exceptionCaught :" + cause.getMessage());
         ctx.channel().close();
     }
 
