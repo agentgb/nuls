@@ -17,6 +17,10 @@ import java.util.List;
 
 import static io.nuls.network.constant.NetworkConstant.*;
 
+/**
+ * 用netty实现网络模块P2P通信
+ *
+ */
 public class NettyNetworkModuleBootstrap extends AbstractNetworkModule {
 
     private ConnectionManager connectionManager = ConnectionManager.getInstance();
@@ -31,6 +35,10 @@ public class NettyNetworkModuleBootstrap extends AbstractNetworkModule {
         nodeManager.init();
     }
 
+    /**
+     * 读取配置文件里的网络模块参数
+     * 包括服务器的端口号、网络通信魔法参数、主动连接最大数和被动连接最大数，种子节点信息等
+     */
     private void initNetworkParam() {
         NetworkParam networkParam = NetworkParam.getInstance();
         networkParam.setPort(NulsConfig.MODULES_CONFIG.getCfgValue(NETWORK_SECTION, NETWORK_SERVER_PORT, 8003));
@@ -46,6 +54,9 @@ public class NettyNetworkModuleBootstrap extends AbstractNetworkModule {
         networkParam.setSeedIpList(ipList);
     }
 
+    /**
+     * 初始化并注册其他网络模块需要用到的服务
+     */
     private void initOther() {
         MagicNumberFilter.getInstance().addMagicNum(NetworkParam.getInstance().getPacketMagic());
         MessageFilterChain.getInstance().addFilter(MagicNumberFilter.getInstance());
@@ -58,6 +69,10 @@ public class NettyNetworkModuleBootstrap extends AbstractNetworkModule {
         MessageManager.putMessage(NodesIpMessage.class);
     }
 
+    /**
+     * 1.启动当前节点的服务，供其他节点发现并连接
+     * 2.启动一个线程不停的询问更多可连接的节点，保证最大化连接，维持网络稳定运行
+     */
     @Override
     public void start() {
         connectionManager.start();

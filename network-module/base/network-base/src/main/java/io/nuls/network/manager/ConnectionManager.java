@@ -20,6 +20,10 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 网络连接服务器
+ * P2P节点的连接，消息的接收都在服务器里处理
+ */
 public class ConnectionManager {
 
     private static ConnectionManager instance = new ConnectionManager();
@@ -43,15 +47,19 @@ public class ConnectionManager {
 
     private MessageBusService messageBusService = NulsContext.getServiceBean(MessageBusService.class);
 
+    /**
+     * 初始化节点服务器
+     */
     public void init() {
         nodeManager = NodeManager.getInstance();
         broadcastHandler = BroadcastHandler.getInstance();
         nettyServer = new NettyServer(network.getPort());
         nettyServer.init();
-//        eventBusService = NulsContext.getServiceBean(EventBusService.class);
-//        messageHandlerFactory = network.getMessageHandlerFactory();
     }
 
+    /**
+     * 启动节点服务器
+     */
     public void start() {
         TaskManager.createAndRunThread(NetworkConstant.NETWORK_MODULE_ID, "node connection", new Runnable() {
             @Override
@@ -65,8 +73,11 @@ public class ConnectionManager {
         }, false);
     }
 
+    /**
+     * 启动一个线程，尝试主动连接其他P2P节点
+     * @param node
+     */
     public void connectionNode(Node node) {
-
         TaskManager.createAndRunThread(NetworkConstant.NETWORK_MODULE_ID, "node connection", new Runnable() {
             @Override
             public void run() {
@@ -77,6 +88,12 @@ public class ConnectionManager {
         }, true);
     }
 
+    /**
+     * 收到网络消息后，在这里过滤，
+     * 有恶意节点时，直接断链
+     * @param buffer
+     * @param node
+     */
     public void receiveMessage(ByteBuffer buffer, Node node) {
         List<BaseMessage> list;
         try {
@@ -85,6 +102,7 @@ public class ConnectionManager {
                 buffer.clear();
                 return;
             }
+            //收到的信息可能是多条消息，需要依次反序列化
             list = new ArrayList<>();
             byte[] bytes = buffer.array();
             int offset = 0;
@@ -102,6 +120,8 @@ public class ConnectionManager {
                     offset = 0;
                 }
             }
+
+            //消息过滤，不合法的消息直接和节点断链
             for (BaseMessage message : list) {
                 if (MessageFilterChain.getInstance().doFilter(message)) {
                     MessageHeader header = message.getHeader();
@@ -126,7 +146,13 @@ public class ConnectionManager {
         }
     }
 
-
+    /**
+     * 处理消息
+     * 如果是网络模块的消息，直接交给网络消息处理器处理
+     * 如果是其他消息则转到messageBusService里，交由其他模块处理
+     * @param message
+     * @param node
+     */
     private void processMessage(BaseMessage message, Node node) {
         if (message == null) {
 //            Log.error("---------------------message is null--------------------------------");
@@ -147,6 +173,11 @@ public class ConnectionManager {
         }
     }
 
+    /**
+     * 新启线程异步处理网络模块信息
+     * @param message
+     * @param node
+     */
     private void asynExecute(BaseMessage message, Node node) {
         BaseNetworkMeesageHandler handler = messageHandlerFactory.getHandler(message);
         TaskManager.asynExecuteRunnable(new Runnable() {
@@ -172,6 +203,12 @@ public class ConnectionManager {
         });
     }
 
+    /**
+     * 处理完信息后，如果有需要返回的信息，则同步返回
+     * @param messageResult
+     * @param node
+     * @throws IOException
+     */
     public void processMessageResult(NetworkEventResult messageResult, Node node) throws IOException {
         if (node.getStatus() == Node.CLOSE) {
             return;

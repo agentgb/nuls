@@ -18,6 +18,19 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * 网络节点与节点组管理器
+ * 基本规则与思路：
+ * 1.网络节点根据功能与性质的不同，按组区分，目前默认有主动连接节点组（我去主动连接其他节点）和被动连接节点组（其他节点主动连接我），
+ * 之后会逐渐实现共识节点组，多链并行节点组等
+ * 2.原则上当相同IP地址出现多次连接时，未避免重复连接，只允许第一次连接成功，
+ * 但考虑到部分节点使用相同局域网运行nuls节点或钱包（这些节点暴露的外网IP一致），
+ * 为了尽量不影响局域网节点的使用，当前节点可被动接受同一IP地址最多10个连接，
+ * 如果是当前节点主动连接其他节点时，不能再重复连接已存在(包括主动与被动)的IP地址
+ * 3.为了尽可能维持网络的稳定，避免分叉出现，则需要持续保持最大数量的节点连接（默认主动连接最大数为10，被动连接最大数为30），
+ * 管理器需要不断的寻找更多可用的节点（可通过网络询问其他节点），
+ * 同时清理已经不可用的节点（一个节点连续尝试6次连接均失败，则视为不可用）。
+ */
 public class NodeManager implements Runnable {
 
     private static NodeManager instance = new NodeManager();
@@ -33,10 +46,10 @@ public class NodeManager implements Runnable {
 
     private Map<String, NodeGroup> nodeGroups = new ConcurrentHashMap<>();
 
-    //存放未连接成功的节点
-    private Map<String, Integer> firstUnConnectedNodes = new ConcurrentHashMap<>();
-    //存放断开连接的节点
-    private Map<String, Node> disConnectNodes = new ConcurrentHashMap<>();
+    //存放未连接成功或断开连接的节点
+    private Map<String, Node> unConnectNodes = new ConcurrentHashMap<>();
+    //存放可连接的节点
+    private Map<String, Node> canConnectNodes = new ConcurrentHashMap<>();
     //存放连接成功但还未握手成功的节点
     private Map<String, Node> connectedNodes = new ConcurrentHashMap<>();
     //存放握手成功的节点
@@ -57,7 +70,7 @@ public class NodeManager implements Runnable {
     private NetworkStorageService networkStorageService;
 
     /**
-     * 初始化主动连接节点组合(outGroup)被动连接节点组(inGroup)
+     * 初始化主动连接节点组(outGroup)和被动连接节点组(inGroup)
      */
     public void init() {
         connectionManager = ConnectionManager.getInstance();
@@ -68,6 +81,9 @@ public class NodeManager implements Runnable {
         nodeGroups.put(inNodes.getName(), inNodes);
         nodeGroups.put(outNodes.getName(), outNodes);
 
+        /**
+         * 如果当前节点时种子节点，则可接受更多的被动连接
+         */
         for (String ip : IpUtil.getIps()) {
             if (isSeedNode(ip)) {
                 networkParam.setMaxInCount(networkParam.getMaxInCount() * 2);
@@ -78,7 +94,7 @@ public class NodeManager implements Runnable {
 
     /**
      * 启动的时候，从数据库里取出可用的节点和种子节点，尝试连接
-     * 同时开启获取对方最新信息的线程
+     * 同时开启获取对方最新信息的线程与获取更多可用节点的线程
      */
     public void start() {
         List<Node> nodeList = getNetworkStorage().getLocalNodeList(20);
@@ -96,7 +112,7 @@ public class NodeManager implements Runnable {
      */
     public void reset() {
         Log.debug("------------------network nodeManager reset--------------------");
-        for (Node node : disConnectNodes.values()) {
+        for (Node node : unConnectNodes.values()) {
             node.setFailCount(NetworkConstant.CONEECT_FAIL_MAX_COUNT);
         }
         for (Node node : handShakeNodes.values()) {
@@ -121,27 +137,18 @@ public class NodeManager implements Runnable {
             if (outNodeIdSet.contains(node.getId())) {
                 return false;
             }
-
-            if (!checkFirstUnConnectedNode(node.getId())) {
-                return false;
-            }
-
-            if (!disConnectNodes.containsKey(node.getId()) &&
-                    !connectedNodes.containsKey(node.getId()) &&
-                    !handShakeNodes.containsKey(node.getId())) {
-                //判断是否有相同ip
-                Map<String, Node> nodeMap = getNodes();
-                for (Node n : nodeMap.values()) {
-                    if (n.getIp().equals(node.getIp())) {
-                        return false;
-                    }
+            //判断是否有相同ip
+            Map<String, Node> nodeMap = getNodes();
+            for (Node n : nodeMap.values()) {
+                if (n.getIp().equals(node.getIp())) {
+                    return false;
                 }
-                outNodeIdSet.add(node.getId());
-                node.setType(Node.OUT);
-                connectionManager.connectionNode(node);
-                return true;
             }
-            return false;
+
+            outNodeIdSet.add(node.getId());
+            node.setType(Node.OUT);
+            connectionManager.connectionNode(node);
+            return true;
         } finally {
             lock.unlock();
         }
@@ -157,10 +164,8 @@ public class NodeManager implements Runnable {
         lock.lock();
         try {
             if (!connectedNodes.containsKey(node.getId()) && !handShakeNodes.containsKey(node.getId())) {
-                // those nodes that are not connected at once, remove it when connected +
-                firstUnConnectedNodes.remove(node.getId());
-                // those nodes that are not connected at once, remove it when connected -
-                disConnectNodes.remove(node.getId());
+                unConnectNodes.remove(node.getId());
+                canConnectNodes.remove(node.getId());
                 connectedNodes.put(node.getId(), node);
                 return true;
             }
@@ -196,7 +201,7 @@ public class NodeManager implements Runnable {
     }
 
     public Node getNode(String nodeId) {
-        Node node = disConnectNodes.get(nodeId);
+        Node node = unConnectNodes.get(nodeId);
         if (node == null) {
             node = connectedNodes.get(nodeId);
         }
