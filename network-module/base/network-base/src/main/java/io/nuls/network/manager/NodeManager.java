@@ -54,8 +54,6 @@ public class NodeManager implements Runnable {
     private Map<String, Node> connectedNodes = new ConcurrentHashMap<>();
     //存放握手成功的节点
     private Map<String, Node> handShakeNodes = new ConcurrentHashMap<>();
-    //存放所有正在连接或已连接的主动节点的id，防止重复连接
-    private Set<String> outNodeIdSet = ConcurrentHashMap.newKeySet();
 
     private ReentrantLock lock = new ReentrantLock();
 
@@ -118,6 +116,7 @@ public class NodeManager implements Runnable {
         for (Node node : handShakeNodes.values()) {
             removeNode(node);
         }
+
     }
 
     /**
@@ -133,10 +132,6 @@ public class NodeManager implements Runnable {
         }
         lock.lock();
         try {
-            //已连接的节点，不再重复连接
-            if (outNodeIdSet.contains(node.getId())) {
-                return false;
-            }
             //判断是否有相同ip
             Map<String, Node> nodeMap = getNodes();
             for (Node n : nodeMap.values()) {
@@ -145,7 +140,7 @@ public class NodeManager implements Runnable {
                 }
             }
 
-            outNodeIdSet.add(node.getId());
+            unConnectNodes.put(node.getId(), node);
             node.setType(Node.OUT);
             connectionManager.connectionNode(node);
             return true;
@@ -200,6 +195,11 @@ public class NodeManager implements Runnable {
         return true;
     }
 
+    /**
+     * 获取指定节点（包括未连接成功和已连接的）
+     *
+     * @return
+     */
     public Node getNode(String nodeId) {
         Node node = unConnectNodes.get(nodeId);
         if (node == null) {
@@ -223,7 +223,7 @@ public class NodeManager implements Runnable {
      */
     public Map<String, Node> getNodes() {
         Map<String, Node> nodeMap = new HashMap<>();
-        nodeMap.putAll(disConnectNodes);
+        nodeMap.putAll(unConnectNodes);
         nodeMap.putAll(connectedNodes);
         nodeMap.putAll(handShakeNodes);
         return nodeMap;
@@ -258,9 +258,8 @@ public class NodeManager implements Runnable {
         if (node != null) {
             removeNode(node);
         } else {
-//            Log.info("------------remove node is null-----------" + nodeId);
+            Log.info("------------remove node is null-----------" + nodeId);
             getNetworkStorage().deleteNode(nodeId);
-            outNodeIdSet.remove(nodeId);
         }
     }
 
@@ -269,8 +268,7 @@ public class NodeManager implements Runnable {
         if (node != null) {
             removeNode(node);
         } else {
-//            Log.info("------------removeHandshakeNode node is null-----------" + nodeId);
-            outNodeIdSet.remove(node.getId());
+            Log.info("------------removeHandshakeNode node is null-----------" + nodeId);
             getNetworkStorage().deleteNode(nodeId);
         }
     }
@@ -291,7 +289,6 @@ public class NodeManager implements Runnable {
                     return;
                 }
             }
-            outNodeIdSet.remove(node.getId());
             node.destroy();
             removeNodeFromGroup(node);
             removeNodeHandler(node);
@@ -301,8 +298,10 @@ public class NodeManager implements Runnable {
     }
 
     private void removeNodeHandler(Node node) {
+        //恶意节点直接删除
+        //被动节点则说明是对方断链，也直接删除
         if (node.getType() == Node.BAD || node.getType() == Node.IN) {
-            disConnectNodes.remove(node.getId());
+            unConnectNodes.remove(node.getId());
             connectedNodes.remove(node.getId());
             handShakeNodes.remove(node.getId());
             if (node.getStatus() == Node.BAD) {
