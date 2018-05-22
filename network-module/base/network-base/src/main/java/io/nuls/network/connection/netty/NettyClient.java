@@ -57,8 +57,7 @@ public class NettyClient {
                     if (future.isSuccess()) {
                         socketChannel = (SocketChannel) future.channel();
                     } else {
-                        System.out.println("Client connect to host error: " + future.cause() + ", remove node: " + node.getId());
-                        nodeManager.validateFirstUnConnectedNode(node.getId());
+                        System.out.println("Client connect to host fail: " + future.cause() + ", remove node: " + node.getId());
                         nodeManager.removeNode(node.getId());
                     }
                 }
@@ -70,7 +69,6 @@ public class NettyClient {
                 socketChannel.close();
             }
             System.out.println("Client start exception:" + e.getMessage() + ", remove node: " + node.getId());
-            nodeManager.validateFirstUnConnectedNode(node.getId());
             nodeManager.removeNode(node.getId());
         }
     }

@@ -131,7 +131,7 @@ public class NodeManager implements Runnable {
             return false;
         }
         //已经有50个正在尝试的连接
-        if(unConnectNodes.values().size() >= 50) {
+        if (unConnectNodes.values().size() >= 50) {
             return false;
         }
         lock.lock();
@@ -252,18 +252,13 @@ public class NodeManager implements Runnable {
     }
 
     /**
-     * 删除节点，如果发现节点组里没有此节点，说明一次都没有连接过，
-     * 则直接删除数据库里的记录，不再继续尝试做连接
-     *
+     * 删除节点
      * @param nodeId
      */
     public void removeNode(String nodeId) {
         Node node = getNode(nodeId);
         if (node != null) {
             removeNode(node);
-        } else {
-            Log.info("------------remove node is null-----------" + nodeId);
-            getNetworkStorage().deleteNode(nodeId);
         }
     }
 
@@ -271,9 +266,6 @@ public class NodeManager implements Runnable {
         Node node = getHandshakeNode(nodeId);
         if (node != null) {
             removeNode(node);
-        } else {
-            Log.info("------------removeHandshakeNode node is null-----------" + nodeId);
-            getNetworkStorage().deleteNode(nodeId);
         }
     }
 
@@ -321,13 +313,8 @@ public class NodeManager implements Runnable {
             handShakeNodes.remove(node.getId());
         }
 
-        if (node.getFailCount() <= NetworkConstant.CONEECT_FAIL_MAX_COUNT) {
-            //node.setLastFailTime(TimeService.currentTimeMillis() + 10 * 1000 * node.getFailCount());
-            if (!disConnectNodes.containsKey(node.getId())) {
-                disConnectNodes.put(node.getId(), node);
-            }
-        } else {
-            disConnectNodes.remove(node.getId());
+        if (node.getFailCount() >= NetworkConstant.CONEECT_FAIL_MAX_COUNT) {
+            unConnectNodes.remove(node.getId());
             getNetworkStorage().deleteNode(node.getId());
         }
     }
@@ -342,17 +329,6 @@ public class NodeManager implements Runnable {
         node.getGroupSet().clear();
     }
 
-    public void saveNode(Node node) {
-//        NodePo po = NodeTransferTool.toPojo(node);
-//        getNodeDao().saveChange(po);
-        getNetworkStorage().saveNode(node);
-    }
-
-    public void deleteNode(String nodeId) {
-        outNodeIdSet.remove(nodeId);
-        disConnectNodes.remove(nodeId);
-    }
-
     private void removeNodeFromGroup(Node node, String groupName) {
         NodeGroup group = nodeGroups.get(groupName);
         if (group != null) {
@@ -361,6 +337,13 @@ public class NodeManager implements Runnable {
         node.getGroupSet().remove(groupName);
     }
 
+    public void saveNode(Node node) {
+        getNetworkStorage().saveNode(node);
+    }
+
+    public void deleteNode(String nodeId) {
+        unConnectNodes.remove(nodeId);
+    }
 
     private void getNodeFromDataBase(int size) {
         Set<String> ipSet = new HashSet<>();
@@ -408,24 +391,8 @@ public class NodeManager implements Runnable {
         }
     }
 
-
     public Collection<Node> getAvailableNodes() {
         return handShakeNodes.values();
-    }
-
-    public List<Node> getConnectNode() {
-        List<Node> nodeList = new ArrayList<>();
-        for (Node node : disConnectNodes.values()) {
-            if (node.isAlive()) {
-                nodeList.add(node);
-            }
-        }
-        for (Node node : connectedNodes.values()) {
-            if (node.isAlive()) {
-                nodeList.add(node);
-            }
-        }
-        return nodeList;
     }
 
     public void blackNode(String nodeId, int status) {
@@ -440,12 +407,6 @@ public class NodeManager implements Runnable {
     }
 
 
-    public void removeNodeFromGroup(String groupName, String nodeId) {
-        if (!nodeGroups.containsKey(groupName)) {
-            return;
-        }
-        nodeGroups.get(groupName).removeNode(nodeId);
-    }
 
     /**
      * 随机保留2个种子节点的连接，其他的全部断开
@@ -466,57 +427,6 @@ public class NodeManager implements Runnable {
         }
     }
 
-    /**
-     * those nodes that are not connected at once, reconnection 6 times
-     *
-     * @param nodeId
-     * @return
-     */
-    public void validateFirstUnConnectedNode(String nodeId) {
-        if (nodeId == null)
-            return;
-        Node node = getNode(nodeId);
-        if (node == null) {
-            // seed nodes
-            for (String ip : networkParam.getSeedIpList()) {
-                if (nodeId.startsWith(ip)) {
-                    return;
-                }
-            }
-            Integer count = firstUnConnectedNodes.get(nodeId);
-            if (count == null) {
-                firstUnConnectedNodes.put(nodeId, 1);
-            } else {
-                firstUnConnectedNodes.put(nodeId, ++count);
-            }
-        }
-    }
-
-    /**
-     * those nodes that are not connected at once, reconnection 6 times
-     * and then start counting, reconnection: counter >= 60
-     * [0,6] (6, 60) [60,]
-     *
-     * @param nodeId
-     * @return
-     */
-    private boolean checkFirstUnConnectedNode(String nodeId) {
-        Integer count = firstUnConnectedNodes.get(nodeId);
-        if (count == null)
-            return true;
-        if (count <= NetworkConstant.CONEECT_FAIL_MAX_COUNT) {
-            // [0,6]
-            return true;
-        } else if (count < (NetworkConstant.CONEECT_FAIL_MAX_COUNT * 10)) {
-            // (6, 60)
-            firstUnConnectedNodes.put(nodeId, ++count);
-            return false;
-        } else {
-            // [60, ~]
-            firstUnConnectedNodes.remove(nodeId);
-            return true;
-        }
-    }
 
     public boolean isSeedNode(String ip) {
         return networkParam.getSeedIpList().contains(ip);
@@ -530,8 +440,8 @@ public class NodeManager implements Runnable {
     public void run() {
         Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
         while (running) {
-            Log.debug("--------disConnectNodes:" + disConnectNodes.size());
-            for (Node node : disConnectNodes.values()) {
+            Log.debug("--------unConnectNodes:" + unConnectNodes.size());
+            for (Node node : unConnectNodes.values()) {
                 System.out.println(node.toString());
             }
 
@@ -542,11 +452,7 @@ public class NodeManager implements Runnable {
 
             Log.debug("--------handShakeNodes:" + handShakeNodes.size());
             for (Node node : handShakeNodes.values()) {
-//                System.out.println(node.toString());
-            }
-
-            for (Node node : handShakeNodes.values()) {
-                Log.debug(node.toString() + ",blockHeight:" + node.getBestBlockHeight());
+                Log.info(node.toString() + ",blockHeight:" + node.getBestBlockHeight());
             }
 
             try {
@@ -555,16 +461,6 @@ public class NodeManager implements Runnable {
                 Log.error(e);
             }
 
-            //连接的节点数量太少时，主动连接种子节点以获取种子节点
-            //超过一定数量之后，就断开与种子节点的连接，减轻种子节点的压力
-            if (firstUnConnectedNodes.size() > 20) {
-                firstUnConnectedNodes.clear();
-            }
-            try {
-                Thread.sleep(10000);
-            } catch (InterruptedException e) {
-                Log.error(e);
-            }
             if (handShakeNodes.size() <= 2) {
                 List<Node> seedNodes = getSeedNodes();
                 for (Node node : seedNodes) {
@@ -582,14 +478,12 @@ public class NodeManager implements Runnable {
                 }
             }
 
-            for (Node node : disConnectNodes.values()) {
+            for (Node node : unConnectNodes.values()) {
                 if (node.getType() == Node.OUT && node.getStatus() == Node.CLOSE) {
-                    /*if (node.getLastFailTime() <= TimeService.currentTimeMillis()) {
-                        connectionManager.connectionNode(node);
-                    }*/
                     connectionManager.connectionNode(node);
                 }
             }
+
         }
     }
 
