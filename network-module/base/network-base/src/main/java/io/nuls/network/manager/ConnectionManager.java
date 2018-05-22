@@ -158,7 +158,7 @@ public class ConnectionManager {
 //            Log.error("---------------------message is null--------------------------------");
             return;
         }
-        System.out.println("-----------------=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-------"+message.getClass());
+        //System.out.println("-----------------=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-------"+message.getClass());
         if (isNetworkMessage(message)) {
             if (node.getStatus() != Node.HANDSHAKE && !isHandShakeMessage(message)) {
                 return;
