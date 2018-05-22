@@ -37,7 +37,6 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
 //        Log.info("---------------------- client channelRegistered -----------" + nodeId);
 
         Map<String, Node> nodes = nodeManager.getNodes();
-        //Map<String, Node> nodes = getNetworkService().getNodes();
         // If a node with the same IP already in nodes, as a out node, can not add anymore
         for (Node n : nodes.values()) {
             //both ip and port equals , it means the node is myself
