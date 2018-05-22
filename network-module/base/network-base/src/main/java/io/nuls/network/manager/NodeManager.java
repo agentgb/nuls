@@ -130,6 +130,10 @@ public class NodeManager implements Runnable {
         if (networkParam.getLocalIps().contains(node.getIp())) {
             return false;
         }
+        //已经有50个正在尝试的连接
+        if(unConnectNodes.values().size() >= 50) {
+            return false;
+        }
         lock.lock();
         try {
             //判断是否有相同ip
