@@ -139,7 +139,7 @@ public class Node extends BaseNulsData {
 
     public void destroy() {
         this.lastFailTime = TimeService.currentTimeMillis();
-        failCount += 1;
+        this.setFailCount(this.getFailCount() + 1);
         this.status = Node.CLOSE;
     }
 
